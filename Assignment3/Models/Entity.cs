@@ -10,5 +10,11 @@ namespace Assignment3.Models
 
         [Required]
         public DateTimeOffset CreationTime { get; set; }
+
+        public Entity()
+        {
+            Id = Guid.NewGuid();
+            CreationTime = DateTimeOffset.Now;
+        }
     }
 }
