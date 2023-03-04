@@ -2,12 +2,8 @@
 
 namespace Assignment3.Models
 {
-    public class Immunization
+    public class Immunization:Entity
     {
-        [Key]
-        public Guid Id { get; set; }
-        [Required]
-        public DateTimeOffset CreationTime { get; set; }
         [Required, StringLength(128)]
         public string OfficialName { get; set; }
         [StringLength(128)]
