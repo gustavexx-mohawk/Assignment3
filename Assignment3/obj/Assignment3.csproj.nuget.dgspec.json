@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj": {}
+    "D:\\Year Three\\Semester 5\\AdvancedDotNet\\AssignmentThree000824338\\Assignment3\\Assignment3\\Assignment3.csproj": {}
   },
   "projects": {
-    "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj": {
+    "D:\\Year Three\\Semester 5\\AdvancedDotNet\\AssignmentThree000824338\\Assignment3\\Assignment3\\Assignment3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj",
+        "projectUniqueName": "D:\\Year Three\\Semester 5\\AdvancedDotNet\\AssignmentThree000824338\\Assignment3\\Assignment3\\Assignment3.csproj",
         "projectName": "Assignment3",
-        "projectPath": "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj",
-        "packagesPath": "C:\\Users\\marcanog\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\obj\\",
+        "projectPath": "D:\\Year Three\\Semester 5\\AdvancedDotNet\\AssignmentThree000824338\\Assignment3\\Assignment3\\Assignment3.csproj",
+        "packagesPath": "C:\\Users\\piper\\.nuget\\packages\\",
+        "outputPath": "D:\\Year Three\\Semester 5\\AdvancedDotNet\\AssignmentThree000824338\\Assignment3\\Assignment3\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\marcanog\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\piper\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -51,7 +51,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -63,7 +64,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.304\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
         }
       }
     }
