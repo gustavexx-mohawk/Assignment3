@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj": {}
+    "C:\\Users\\JKsam\\OneDrive\\Documents\\GitHub\\Assignment3\\Assignment3\\Assignment3.csproj": {}
   },
   "projects": {
-    "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj": {
+    "C:\\Users\\JKsam\\OneDrive\\Documents\\GitHub\\Assignment3\\Assignment3\\Assignment3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj",
+        "projectUniqueName": "C:\\Users\\JKsam\\OneDrive\\Documents\\GitHub\\Assignment3\\Assignment3\\Assignment3.csproj",
         "projectName": "Assignment3",
-        "projectPath": "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\Assignment3.csproj",
-        "packagesPath": "C:\\Users\\marcanog\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\marcanog\\Documents\\AdvancedDotNet\\Assignment3\\Assignment3\\obj\\",
+        "projectPath": "C:\\Users\\JKsam\\OneDrive\\Documents\\GitHub\\Assignment3\\Assignment3\\Assignment3.csproj",
+        "packagesPath": "C:\\Users\\JKsam\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\JKsam\\OneDrive\\Documents\\GitHub\\Assignment3\\Assignment3\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\marcanog\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\JKsam\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -40,10 +45,6 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
-            "Microsoft.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[7.0.3, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.2.3, )"
@@ -55,7 +56,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -67,7 +69,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.304\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.401\\RuntimeIdentifierGraph.json"
         }
       }
     }
