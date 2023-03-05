@@ -10,6 +10,13 @@ namespace Assignment3.Data
         {
         }
 
+        private const string connectionString = "Server=(localdb)\\mssqllocaldb;Database=A3DB;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(connectionString);
+        }
+
         public DbSet<Patient> Patient { get; set; } = default!;
 
         public DbSet<Immunization> Immunization { get; set; }
