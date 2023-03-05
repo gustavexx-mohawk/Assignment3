@@ -2,7 +2,7 @@
 
 namespace Assignment3.Models
 {
-    public class Immunization
+    public class Immunization:Entity
     {
         [Required, StringLength(128)]
         public string OfficialName { get; set; }
