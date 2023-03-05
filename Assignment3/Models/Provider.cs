@@ -5,7 +5,7 @@ namespace Assignment3.Models
     public class Provider : Person
     {
         [Required]
-        public int LicenseNumber { get; set; }
+        public uint LicenseNumber { get; set; }
 
         [Required]
         public string Address { get; set; }
