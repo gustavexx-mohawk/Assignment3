@@ -3,11 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Assignment3.Data
 {
-    public class Assignment3Context:DbContext
+    public class Assignment3Context : DbContext
     {
         public Assignment3Context(DbContextOptions<Assignment3Context> options)
             : base(options)
         {
+        }
+
+        private const string connectionString = "Server=(localdb)\\mssqllocaldb;Database=A3DB;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(connectionString);
         }
 
         public DbSet<Patient> Patient { get; set; } = default!;
