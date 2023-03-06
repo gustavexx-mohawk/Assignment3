@@ -2,7 +2,7 @@
 
 namespace Assignment3.Models
 {
-    public class Provider : Person
+    public class Provider
     {
         [Key]
         public Guid Id { get; set; }

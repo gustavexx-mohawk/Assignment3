@@ -2,7 +2,7 @@
 
 namespace Assignment3.Models
 {
-    public class Patient : Person
+    public class Patient
     {
 
         [Key]
