@@ -13,7 +13,7 @@ namespace Assignment3.Models
         [Required, StringLength(128)]
         public string LastName { get; set; }
         [Required]
-        public int LicenseNumber { get; set; }
+        public uint LicenseNumber { get; set; }
         [Required]
         public string Address { get; set; }
     }
