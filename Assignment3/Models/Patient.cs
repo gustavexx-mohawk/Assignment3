@@ -6,11 +6,5 @@ namespace Assignment3.Models
     {
         [Required]
         public DateTimeOffset DateOfBirth { get; set; }
-
-        // User input DOB
-        public Patient(int year, int month, int day)
-        {
-            DateOfBirth = new DateTimeOffset(year, month, day, 0,0,0, TimeSpan.Zero);
-        }
     }
 }
