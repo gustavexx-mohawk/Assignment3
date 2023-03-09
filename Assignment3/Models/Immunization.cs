@@ -16,7 +16,7 @@ namespace Assignment3.Models
         [Required]
         public DateTimeOffset ExpirationDate { get; set; }
 
-        public DateTimeOffset? UpdatedTime { get { return UpdatedTime; } set { UpdatedTime = DateTimeOffset.Now; } }
+        public DateTimeOffset? UpdatedTime { get; set; }
 
     }
 }
