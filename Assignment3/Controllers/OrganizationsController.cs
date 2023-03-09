@@ -10,7 +10,7 @@ using Assignment3.Models;
 
 namespace Assignment3.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Organization")]
     [ApiController]
     public class OrganizationsController : ControllerBase
     {
@@ -19,6 +19,52 @@ namespace Assignment3.Controllers
         public OrganizationsController(Assignment3Context context)
         {
             _context = context;
+        }
+
+        // POST: api/Organizations
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Error>> PostOrganization(Organization organization)
+        {
+            if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
+            {
+               if (organization.Id != null && organization.CreationTime != null && organization.Name != null 
+                    && organization.Type != null && organization.Address != null)
+                {
+                    if (organization.Type.ToLower() == "Hospital" || 
+                        organization.Type.ToLower() == "Clinic" ||
+                        organization.Type.ToLower() == "Pharmacy")
+                    {
+                        _context.Organization.Add(organization);
+                        await _context.SaveChangesAsync();
+
+                        var result = CreatedAtAction("GetOrganization", new { id = organization.Id }, organization);
+
+                        if (result.StatusCode == 201)
+                        {
+                            return new Error(201, "POST operation completed successfully.");
+                        }
+                        // TODO: Put the thing here for verifying the format is xml or json
+                        // Check what starts with? Try to deserialize?
+                        else
+                        {
+                            return new Error(500, "An unexpected error occurred.");
+                        }
+                    }
+                    else
+                    {
+                        return new Error(400, "Mandatory field missing: Type must be Hospital, Clinic, or Pharmacy.");
+                    }
+                }
+               else
+                {
+                    return new Error(400, "Mandatory field missing.");
+                }
+            }
+            else
+            {
+                return new Error(406, "HTTP Accept header is invalid.");
+            }
         }
 
         // GET: api/Organizations
@@ -71,17 +117,6 @@ namespace Assignment3.Controllers
             }
 
             return NoContent();
-        }
-
-        // POST: api/Organizations
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Organization>> PostOrganization(Organization organization)
-        {
-            _context.Organization.Add(organization);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOrganization", new { id = organization.Id }, organization);
         }
 
         // DELETE: api/Organizations/5
