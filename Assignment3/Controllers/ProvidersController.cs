@@ -76,12 +76,35 @@ namespace Assignment3.Controllers
         // POST: api/Providers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Provider>> PostProvider(Provider provider)
+        public async Task<ActionResult<Error>> PostProvider(Provider provider)
         {
-            _context.Provider.Add(provider);
-            await _context.SaveChangesAsync();
+            if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
+            {
+                if (provider.Id != null && provider.FirstName != null && provider.LastName != null && provider.LicenseNumber != null
+                && provider.CreationTime != null)
+                {
+                    _context.Provider.Add(provider);
+                    await _context.SaveChangesAsync();
+                    var result = CreatedAtAction("GetProvider", new { id = provider.Id }, provider);
 
-            return CreatedAtAction("GetProvider", new { id = provider.Id }, provider);
+                    if (result.StatusCode == 201)
+                    {
+                        return new Error(201, "POST operation completed successfully.");
+                    }
+                    else
+                    {
+                        return new Error(500, "An Unexpected Error Occured.");
+                    }
+                }
+                else
+                {
+                    return new Error(400, "Mandatory Field Missing.");
+                }
+            }
+            else
+            {
+                return new Error(406, "HTTP Accept header is invalid.");
+            }
         }
 
         // DELETE: api/Providers/5
