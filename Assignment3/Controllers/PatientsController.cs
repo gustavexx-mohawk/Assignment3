@@ -76,12 +76,43 @@ namespace Assignment3.Controllers
         // POST: api/Patients
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Patient>> PostPatient(Patient patient)
+        public async Task<ActionResult<Error>> PostPatient(Patient patient)
         {
-            _context.Patient.Add(patient);
-            await _context.SaveChangesAsync();
+            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
+            {
+                if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
+                {
+                    if (patient.Id != null && patient.FirstName != null && patient.LastName != null && patient.CreationTime != null)
+                    {
+                        _context.Patient.Add(patient);
+                        await _context.SaveChangesAsync();
+                        var result = CreatedAtAction("GetProvider", new { id = patient.Id }, patient);
 
-            return CreatedAtAction("GetPatient", new { id = patient.Id }, patient);
+                        if (result.StatusCode == 201)
+                        {
+                            return new Error(201, "POST operation completed successfully.");
+                        }
+                        else
+                        {
+                            return new Error(500, "An Unexpected Error Occured.");
+                        }
+                    }
+                    else
+                    {
+                        return new Error(400, "Mandatory Field Missing.");
+                    }
+                }
+                else
+                {
+                    return new Error(415, "Content is not in XML or JSON format.");                    
+                }
+            }
+            else
+            {
+                return new Error(406, "HTTP Accept header is invalid.");
+            }
+            
+            
         }
 
         // DELETE: api/Patients/5
