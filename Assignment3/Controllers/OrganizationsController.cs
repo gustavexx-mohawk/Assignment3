@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Assignment3.Data;
 using Assignment3.Models;
@@ -26,39 +21,44 @@ namespace Assignment3.Controllers
         [HttpPost]
         public async Task<ActionResult<Error>> PostOrganization(Organization organization)
         {
-            if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
+            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
             {
-               if (organization.Id != null && organization.CreationTime != null && organization.Name != null 
-                    && organization.Type != null && organization.Address != null)
+                if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
                 {
-                    if (organization.Type.ToLower() == "Hospital" || 
-                        organization.Type.ToLower() == "Clinic" ||
-                        organization.Type.ToLower() == "Pharmacy")
+                    if (organization.Name != null && organization.Type != null && organization.Address != null)
                     {
-                        _context.Organization.Add(organization);
-                        await _context.SaveChangesAsync();
-
-                        var result = CreatedAtAction("GetOrganization", new { id = organization.Id }, organization);
-
-                        if (result.StatusCode == 201)
+                        if (organization.Type.ToLower().Equals("hospital") ||
+                            organization.Type.ToLower().Equals("clinic") ||
+                            organization.Type.ToLower().Equals("pharmacy"))
                         {
-                            return new Error(201, "POST operation completed successfully.");
+                            if (!OrganizationExists(organization.Id))
+                            {
+                                _context.Organization.Add(organization);
+                                await _context.SaveChangesAsync();
+
+                                var result = CreatedAtAction("GetOrganization", new { id = organization.Id }, organization);
+
+                                if (result.StatusCode == 201)
+                                {
+                                    return new Error(201, "POST operation completed successfully.");
+                                }
+                                
+                            }
+                            return new Error(500, "An unexpected error occurred.");
                         }
-                        // TODO: Put the thing here for verifying the format is xml or json
-                        // Check what starts with? Try to deserialize?
                         else
                         {
-                            return new Error(500, "An unexpected error occurred.");
+                            return new Error(400, "Mandatory field missing: Type must be Hospital, Clinic, or Pharmacy.");
                         }
                     }
                     else
                     {
-                        return new Error(400, "Mandatory field missing: Type must be Hospital, Clinic, or Pharmacy.");
+                        return new Error(400, "Mandatory field missing.");
                     }
                 }
-               else
+                else
                 {
-                    return new Error(400, "Mandatory field missing.");
+                    return new Error(415, "Content is not in XML or JSON format.");
                 }
             }
             else
