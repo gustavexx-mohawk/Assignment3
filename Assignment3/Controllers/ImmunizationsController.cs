@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Assignment3.Data;
 using Assignment3.Models;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace Assignment3.Controllers
 {
@@ -81,17 +83,53 @@ namespace Assignment3.Controllers
         {
             try
             {
-                string test = Request.Headers.Accept;
-
-                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                var test = immunization.ToString();
+                //if (string.IsNullOrEmpty(test)) { 
+                //    Debug.WriteLine($"test : {test}");
+                // 
+                // if the Content-Type application/json
+                if (Request.Headers.ContentType == "application/json")
                 {
-                    return StatusCode(406, new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed"));// new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed");
+                    // if the body of the request is a valid json
+                    if (!((JsonSerializer.Deserialize<Immunization>(immunization.ToString())).GetType() == typeof(Immunization)))
+                    {
+                        return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
 
+                    }
                 }
 
+                if (Request.Headers.ContentType == "application/xml")
+                {
+                    // if the body of the request is a valid json
+                    byte[] xmlimmunization =  SerializeToXml<Immunization>(immunization);
+                    Immunization xmlDeserializedImmunization = DeserializeFromXml<Immunization>(xmlimmunization);
+                    if (xmlDeserializedImmunization.GetType() == typeof(Immunization))
+                    {
+                        return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
 
-                _context.Immunization.Add(immunization);
-                await _context.SaveChangesAsync();
+                    }
+                }
+                //}
+                //if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                if (string.IsNullOrEmpty(Request.Headers.Accept))
+                {
+                    return StatusCode(406, new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed"));// new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed");
+                }
+                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")) {
+                    Request.Headers.Accept = "application/json";
+
+                    _context.Immunization.Add(immunization);
+                    await _context.SaveChangesAsync();
+
+                    return StatusCode(201, new Error(201, "he POST operation completed successfully"));
+                }
+                
+
+
+
+
+                //_context.Immunization.Add(immunization);
+                //await _context.SaveChangesAsync();
 
                 return CreatedAtAction("GetImmunization", new { id = immunization.Id }, immunization);
             }
@@ -122,6 +160,35 @@ namespace Assignment3.Controllers
         private bool ImmunizationExists(Guid id)
         {
             return _context.Immunization.Any(e => e.Id == id);
+        }
+
+        private byte[] SerializeToXml<T>(T instance)
+        {
+            // type can't be null
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
+            var serializer = new XmlSerializer(typeof(T));
+            var memoryStream = new MemoryStream();
+            serializer.Serialize(memoryStream, instance);
+            var serializedContent = memoryStream.ToArray();
+
+            return serializedContent;
+        }
+
+        private T DeserializeFromXml<T>(byte[] instance)
+        {
+            // instance can't be null
+            if (instance == null)
+                throw new ArgumentNullException("Instance can't be null");
+
+            var serializer = new XmlSerializer(typeof(T));
+            var deserializedObject = (T)serializer.Deserialize(new MemoryStream(instance))!;
+
+            if (deserializedObject == null)
+                throw new ArgumentNullException("Object could not be deserialized, check type");
+
+            return deserializedObject;
         }
     }
 }
