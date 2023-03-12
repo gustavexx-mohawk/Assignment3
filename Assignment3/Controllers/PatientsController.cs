@@ -24,7 +24,7 @@ namespace Assignment3.Controllers
         public PatientsController(Assignment3Context context)
         {
             _context = context;
-        }
+        }        
 
         // POST: Patients
         // Creates a patient record
@@ -36,6 +36,7 @@ namespace Assignment3.Controllers
             {
                 if (patient.FirstName == null || patient.LastName == null || patient.DateOfBirth == null)
                 {
+                    logErrorMsg(400, "Mandatory field missiong");
                     return StatusCode(400, new Error(400, "Mandatory field missing."));
                 }
 
@@ -46,6 +47,7 @@ namespace Assignment3.Controllers
 
                     if (!(xmlDeserializedPatient.GetType() == typeof(Patient)))
                     {
+                        logErrorMsg(415, "Content is not in valid XML format.");
                         return StatusCode(415, new Error(415, "Content is not in valid XML format."));
                     }
                 }
@@ -56,11 +58,13 @@ namespace Assignment3.Controllers
 
                     if (!(jsonDeserializedPatient.GetType() == typeof(Patient)))
                     {
+                        logErrorMsg(415, "Content is not in valid Json format.");
                         return StatusCode(415, new Error(415, "Content is not in valid Json format."));
                     }
                 }
                 else
                 {
+                    logErrorMsg(415, "Content is not in XML or JSON format.");
                     return StatusCode(415, new Error(415, "Content is not in XML or JSON format."));
                 }
                 _context.Patient.Add(patient);
@@ -69,15 +73,18 @@ namespace Assignment3.Controllers
 
                 if (result.StatusCode == 201)
                 {
-                    return StatusCode(201, new Error(201, "The POST operation completed successfully."));
+                    logErrorMsg(201, "The POST operation completed successfully.");
+                    return StatusCode(201, new Error(201, "The POST operation completed successfully."));                    
                 }
                 else
                 {
+                    logErrorMsg(500, "An unexpected error occurred.");
                     return StatusCode(500, new Error(500, "An unexpected error occurred."));
                 }
             }
             else
             {
+                logErrorMsg(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
                 return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
             }
         }
@@ -94,6 +101,7 @@ namespace Assignment3.Controllers
                 if (patient == null)
                 {
                     // 404 NotFound: the requested resoure does not exist on the server
+                    logErrorMsg(404, $"Patient id: {patientId} could not be found.");
                     return StatusCode(404, $"Sorry, {patientId} is not in our database. Please try the other id\n\n" +
                         $"{new Error(404, $"Patient id: {patientId} could not be found.")}");
                 }
@@ -102,6 +110,7 @@ namespace Assignment3.Controllers
             }
             else
             {
+                logErrorMsg(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
                 return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
             }
         }
@@ -120,6 +129,7 @@ namespace Assignment3.Controllers
                 if (patientId != patient.Id)
                 {
                     // 400 Bad Request
+                    logErrorMsg(400, $"Sorry, {patientId} is invalid.");
                     return StatusCode(400, $"Sorry, {patientId} is invalid. Error Code: {StatusCode(400).StatusCode}\n" +
                         $"{new Error(400, "Please input valid id")}");
                 }
@@ -132,17 +142,21 @@ namespace Assignment3.Controllers
                 {
                     if (!PatientExists(patientId))
                     {
+                        logErrorMsg(404, $"Sorry, {patientId} is invalid.");
                         return StatusCode(404, new Error(404, $"Sorry, {patientId} is invalid. Please try the other id"));
                     }
                     else
                     {
+                        logErrorMsg(204, $"{patientId} is not here. Please try the other id");
                         return StatusCode(204, new Error(204, $"{patientId} is not here. Please try the other id Error Code: {StatusCode(204).StatusCode}"));
                     }
                 }
+                logErrorMsg(201, $"Success {patientId} has been updated");
                 return StatusCode(201, new Error(201, $"Success {patientId} has been updated"));
             }
             else
             {
+                logErrorMsg(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
                 return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
             }
         }
@@ -161,6 +175,7 @@ namespace Assignment3.Controllers
                 if (patients.Count() == 0)
                 {
                     // 404: NotFound -> the requested resoure does not exist on the server
+                    logErrorMsg(404, $"Sorry, {firstName} is not in our patient");
                     return StatusCode(404, new Error(404, $"Sorry, {firstName} is not in our patient. Error Code: {StatusCode(404).StatusCode}" +
                         $"The requested resource does not exist on the server."));
                 }
@@ -169,6 +184,7 @@ namespace Assignment3.Controllers
             }
             else
             {
+                logErrorMsg(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
                 return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
             }            
         }
@@ -187,6 +203,7 @@ namespace Assignment3.Controllers
                 if (patients.Count() == 0)
                 {
                     // 404: NotFound -> the requested resoure does not exist on the server
+                    logErrorMsg(404, $"Sorry, {lastName} is not in our DB.");
                     return StatusCode(404, new Error(404, $"Sorry, {lastName} is not in our DB. The requested resource does not exist on the server."));
                 }
 
@@ -194,6 +211,7 @@ namespace Assignment3.Controllers
             }
             else
             {
+                logErrorMsg(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
                 return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
             }
         }
@@ -212,6 +230,7 @@ namespace Assignment3.Controllers
                 if (patients.Count() == 0)
                 {
                     // 404: NotFound -> the requested resoure does not exist on the server
+                    logErrorMsg(404, $"Sorry, {dateOfBirth} is not in our DB.");
                     return StatusCode(404, new Error(404, $"Sorry, {dateOfBirth} is not match in our patients." +
                         $"the requested resource does not exist on the server."));
                 }
@@ -219,6 +238,7 @@ namespace Assignment3.Controllers
             }
             else
             {
+                logErrorMsg(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
                 return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
             }
         }
@@ -236,28 +256,34 @@ namespace Assignment3.Controllers
                     var patient = await _context.Patient.FindAsync(patientId);
                     if (patient.Equals(null))
                     {
+                        logErrorMsg(404, $"Sorry, {patientId} is not in our DB.");
                         return StatusCode(404, new Error(404, $"Sorry, {patientId} is not in our database. Please try the other id"));
                     }
 
                     _context.Patient.Remove(patient);
                     await _context.SaveChangesAsync();
+                    logErrorMsg(204, "DELETE operation completed successfully.");
                     return StatusCode(204, "DELETE operation completed successfully.");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!PatientExists(patientId))
                     {
+                        logErrorMsg(404, $"Sorry, {patientId} is invalid.");
                         return StatusCode(404, $"Sorry, {patientId} is invalid. Please try the other id");
                     }
                     else
                     {
+                        logErrorMsg(204, $"Sorry, {patientId} is not here.");
                         return StatusCode(204, $"{patientId} is not here. Please try the other id Error Code: {StatusCode(204).StatusCode}");
                     }
                 }
+                logErrorMsg(201, $"{patientId} has been updated");
                 return StatusCode(201, $"{patientId} has been updated");
             }
             else
             {
+                logErrorMsg(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
                 return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
             }            
         }
@@ -265,6 +291,14 @@ namespace Assignment3.Controllers
         private bool PatientExists(Guid id)
         {
             return _context.Patient.Any(e => e.Id == id);
+        }
+
+        // log Error msg to a database
+        public void logErrorMsg(int code, string msg)
+        {
+            string position = "Patient || ";
+            Error error = new Error(code, position + msg);
+            _context.Error.Add(error);
         }
 
         private byte[] SerializeToXml<T>(T instance)
