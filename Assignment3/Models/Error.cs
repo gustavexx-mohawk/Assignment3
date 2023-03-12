@@ -1,16 +1,18 @@
-﻿namespace Assignment3.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.Xml.Serialization;
+
+namespace Assignment3.Models
 {
-    public class Error
+    public class Error : Entity
     {
+        [Required]
         public string Message { get; set; }
 
+        [Required]
         public int StatusCode { get; set; }
 
-        public Guid Id { get; set; }
-
-        public Error(int statusCode, string message)
+        public Error(int statusCode, string message) : base()
         {
-            Id = Guid.NewGuid();
             Message = message;
             StatusCode = statusCode;
         }
@@ -18,7 +20,7 @@
         override
         public string? ToString()
         {
-            return "ErrorID: " + Id + "\n" + "StatusCode: " + StatusCode + "\n" + Message;
+            return $"{Message} (StatusCode: {StatusCode}, Id: {Id})";
         }
     }
 }
