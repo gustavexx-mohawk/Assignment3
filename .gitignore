@@ -452,3 +452,8 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+/Assignment3/Migrations/Assignment3ContextModelSnapshot.cs
+/Assignment3/Migrations/20230312224327_finalMigration.Designer.cs
+/Assignment3/Migrations/20230312224327_finalMigration.cs
+/Assignment3/Migrations/20230312223623_init.Designer.cs
+/Assignment3/Migrations/20230312223623_init.cs
