@@ -4,6 +4,8 @@ using Assignment3.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Serialization;
+using NuGet.RuntimeModel;
 using System.Text;
 using System.Text.Json;
 
@@ -110,6 +112,48 @@ namespace Assignment3UnitTest
             
             //Assert
             Assert.AreEqual(200, actualResult.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task Patient_PostRequest()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<Assignment3Context>()
+                .UseSqlServer()
+                .Options;
+            db = new Assignment3Context(options);
+
+            // Create database
+            db.Database.EnsureDeleted();
+            db.Database.EnsureCreated();
+
+            // Patient record
+            Patient patient = new Patient()
+            {
+                Id = Guid.NewGuid(),
+                CreationTime = DateTimeOffset.Now,
+                FirstName = "John",
+                LastName = "Doe",
+                DateOfBirth = DateTimeOffset.Parse("1987-07-06").Date
+            };
+
+            var patientController = new PatientsController(db);
+            patientController.ControllerContext = new ControllerContext();
+            patientController.ControllerContext.HttpContext = new DefaultHttpContext();
+            patientController.Request.Headers.Add("Accept", "application/json");
+
+            var serializedToJson = JsonSerializer.Serialize(patient);
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(serializedToJson));
+
+            patientController.Request.Body = stream;
+            patientController.HttpContext.Response.ContentType = "application/json";
+
+            // Act
+            var actualResult = patientController.Response;
+
+            //Assert
+            Assert.AreEqual(200, actualResult.StatusCode);
+
         }
     }
 }
