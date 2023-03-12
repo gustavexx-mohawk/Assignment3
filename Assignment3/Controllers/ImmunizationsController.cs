@@ -25,6 +25,10 @@ namespace Assignment3.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Gets list of immunizations records
+        /// </summary>
+        /// <returns>A list of all the immunizations records present in the DB</returns>
         // GET: /Immunization
         [HttpGet]
         private async Task<ActionResult<IEnumerable<Immunization>>> GetImmunization()
@@ -32,6 +36,11 @@ namespace Assignment3.Controllers
             return await _context.Immunization.ToListAsync();
         }
 
+        /// <summary>
+        /// Gets an immunization record from the DB based on the id
+        /// </summary>
+        /// <param name="immunizationId">Id of the immunization in format Guid, Immunization/B93955E2-0555-4261-B792-0AA0225FBFC2</param>
+        /// <returns>A Immunization object</returns>
         // GET: Immunization/B93955E2-0555-4261-B792-0AA0225FBFC2
         [HttpGet("{immunizationId}")]
         public async Task<ActionResult<Immunization>> GetImmunizationByImmunizationIdAsync(Guid immunizationId)
@@ -88,7 +97,11 @@ namespace Assignment3.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Gets an immunization list from the DB based on the creation time
+        /// </summary>
+        /// <param name="creationTime">Creation time, format should be: 2023-03-11T17:50:24.0444629</param>
+        /// <returns>List of immunization with the created time</returns>
         // GET: Immunization?creationTime="2023-03-11T17:50:24.0444629"
         [HttpGet("creationTime")]
         public async Task<ActionResult<Immunization>> GetImmunizationByCreatedDateAsync(DateTimeOffset creationTime)
@@ -147,6 +160,11 @@ namespace Assignment3.Controllers
 
         }
 
+        /// <summary>
+        /// Gets an immunization list from the DB based on the official name
+        /// </summary>
+        /// <param name="officialName">Official name of the immunization</param>
+        /// <returns>List of immunization with the that official name</returns>
         [HttpGet("officialName")]
         public async Task<ActionResult<Immunization>> GetImmunizationByOfficialNameAsync(string officialName)
         {
@@ -202,6 +220,11 @@ namespace Assignment3.Controllers
 
         }
 
+        /// <summary>
+        /// Gets an immunization list from the DB based on the trade name
+        /// </summary>
+        /// <param name="tradeName">Trade name of the immunization</param>
+        /// <returns>List of immunization with the trade name</returns>
         [HttpGet("tradeName")]
         public async Task<ActionResult<Immunization>> GetImmunizationByTradelNameAsync(string? tradeName)
         {
@@ -256,6 +279,12 @@ namespace Assignment3.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Gets an immunization list from the DB based on the lot number
+        /// </summary>
+        /// <param name="lotNumber">Lot number of the immunization</param>
+        /// <returns>List of immunization with the lot number</returns>
         [HttpGet("lotNumber")]
         public async Task<ActionResult<Immunization>> GetImmunizationByLotNumberAsync(string lotNumber)
         {
@@ -313,7 +342,12 @@ namespace Assignment3.Controllers
         }
 
 
-
+        /// <summary>
+        /// Updates a record from the DB based on the id of the immunization
+        /// </summary>
+        /// <param name="immunizationId">Id of the immunization</param>
+        /// <param name="immunization">Immunization object (json) with the updates applied</param>
+        /// <returns>Status code of the server response</returns>
         // PUT: api/Immunizations/3F0D0E7E-370D-4980-AD50-003271D2C117
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{immunizationId}")]
@@ -408,27 +442,10 @@ namespace Assignment3.Controllers
         // POST: api/Immunization
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         /// <summary>
-        /// Sample of an XML request
-        ///     <?xml version="1.0" encoding="UTF-8"?>
-        ///         <Immunization>
-        ///             <OfficialName>string</OfficialName>
-        ///             <TradeName>string</TradeName>
-        ///             <LotNumber>string</LotNumber>
-        ///             <ExpirationDate>2023-03-12T15:43:48.527Z</ExpirationDate>
-        ///         </Immunization>
+        /// Creates a new Immunization record
         /// </summary>
-        /// <param name="immunization"></param>
-        /// <remarks>
-        /// 
-        /// Sample of a request
-        ///     <?xml version="1.0" encoding="UTF-8"?>
-        ///         <Immunization>
-        ///             <OfficialName>string</OfficialName>
-        ///             <TradeName>string</TradeName>
-        ///             <LotNumber>string</LotNumber>
-        ///             <ExpirationDate>2023-03-12T15:43:48.527Z</ExpirationDate>
-        ///         </Immunization>
-        /// </remarks>
+        /// <param name="immunization"> Immonization object</param>
+        /// <returns>Status code of the server response</returns>
         [HttpPost]
         public async Task<ActionResult<Error>> PostImmunization(Immunization immunization)
         {
@@ -521,6 +538,11 @@ namespace Assignment3.Controllers
 
         }
 
+        /// <summary>
+        /// Deletes a Immunization record based on the Id of the immunization
+        /// </summary>
+        /// <param name="immunizationId">id of the immunization</param>
+        /// <returns>Status code of the server response</returns>
         // DELETE: api/Immunizations/7CC3C310-4F4A-432B-AC48-0AC354B217D8
         [HttpDelete("{immunizationId}")]
         public async Task<ActionResult<Error>> DeleteImmunization(Guid immunizationId)
