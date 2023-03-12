@@ -10,7 +10,7 @@ using System.Text.Json;
 namespace Assignment3UnitTest
 {
     [TestClass]
-    public class ImmunizationTest:ControllerBase
+    public class UnitTests:ControllerBase
     {
         private Assignment3Context db;
 
@@ -71,6 +71,45 @@ namespace Assignment3UnitTest
             Assert.AreEqual(200, test3.StatusCode);
         }
 
-    
+        [TestMethod]
+        public async Task Organization_PostRequest()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<Assignment3Context>()
+                .UseSqlServer()
+                .Options;
+            db = new Assignment3Context(options);
+
+            // Create database
+            db.Database.EnsureDeleted();
+            db.Database.EnsureCreated();
+
+            // Organization record
+            Organization organization = new Organization()
+            {
+                Id = Guid.NewGuid(),
+                CreationTime = DateTimeOffset.Now,
+                Name = "Rexall",
+                Type = "Pharmacy",
+                Address = "930 Upper Paradise Rd #13, Hamilton, ON L9B 2N1"
+            };
+
+            var organizationController = new OrganizationsController(db);
+            organizationController.ControllerContext = new ControllerContext();
+            organizationController.ControllerContext.HttpContext = new DefaultHttpContext();
+            organizationController.Request.Headers.Add("Accept", "application/json");
+
+            var serializedToJson = JsonSerializer.Serialize(organization);
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(serializedToJson));
+
+            organizationController.Request.Body = stream;
+            organizationController.HttpContext.Response.ContentType = "application/json";
+
+            // Act
+            var actualResult = organizationController.Response;
+            
+            //Assert
+            Assert.AreEqual(200, actualResult.StatusCode);
+        }
     }
 }
