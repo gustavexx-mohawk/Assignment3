@@ -10,7 +10,7 @@ using Assignment3.Models;
 
 namespace Assignment3.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Provider")]
     [ApiController]
     public class ProvidersController : ControllerBase
     {
@@ -21,34 +21,36 @@ namespace Assignment3.Controllers
             _context = context;
         }
 
-        // POST: api/Providers
+        // POST: api/Provider
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Error>> PostProvider(Provider provider)
         {
-            if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
+            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
             {
                 if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
                 {
-                    if (provider.Id != null && provider.FirstName != null && provider.LastName != null && provider.LicenseNumber != null
-                && provider.CreationTime != null)
+                    if (provider.Id != null && provider.FirstName != null && provider.LastName != null
+                        && provider.CreationTime != null && provider.LicenseNumber != null)
                     {
                         if (!ProviderExists(provider.Id))
                         {
                             _context.Provider.Add(provider);
                             await _context.SaveChangesAsync();
+
                             var result = CreatedAtAction("GetProvider", new { id = provider.Id }, provider);
 
                             if (result.StatusCode == 201)
                             {
                                 return new Error(201, "POST operation completed successfully.");
                             }
+
                         }
                         return new Error(500, "An unexpected error occurred.");
                     }
                     else
                     {
-                        return new Error(400, "Mandatory Field Missing.");
+                        return new Error(400, "Mandatory field missing.");
                     }
                 }
                 else
@@ -62,7 +64,7 @@ namespace Assignment3.Controllers
             }
         }
 
-        // GET: api/Providers/5
+        // GET: api/Provider/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Provider>> GetProvider(Guid id)
         {
@@ -72,7 +74,7 @@ namespace Assignment3.Controllers
 
                 if (provider == null)
                 {
-                    //return new Error(404, "Organization id " + id + " was not found.");
+                    //return new Error(404, "Provider id " + id + " was not found.");
                     return StatusCode(404);
                 }
                 else
@@ -88,7 +90,7 @@ namespace Assignment3.Controllers
             }
         }
 
-        // PUT: api/Providers/5
+        // PUT: api/Provider/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<ActionResult<Error>> PutProvider(Guid id, Provider provider)
@@ -97,8 +99,8 @@ namespace Assignment3.Controllers
             {
                 if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
                 {
-                    if (provider.FirstName != null && provider.LastName != null && provider.Id != null
-                        && provider.Address != null && provider.CreationTime != null)
+                    if (provider.Id != null && provider.FirstName != null && provider.LastName != null && provider.LicenseNumber != null
+                        && provider.CreationTime != null)
                     {
                         _context.Entry(provider).State = EntityState.Modified;
 
@@ -137,14 +139,14 @@ namespace Assignment3.Controllers
         }
 
         // GET: api/Provider?firstName="value"
-        [HttpGet("firstName")]
-        public async Task<ActionResult<IEnumerable<Provider>>> GetProvidersByFirstName(string firstName)
+        [HttpGet("name")]
+        public async Task<ActionResult<IEnumerable<Provider>>> GetOrganizationsByName(string firstName)
         {
             if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
             {
                 var providers = from p in _context.Provider
-                                where p.FirstName == firstName
-                                select p;
+                                    where p.FirstName == firstName
+                                    select p;
 
                 //return new Error(200, "The GET operation completed successfully.");
                 return await providers.ToListAsync();
@@ -157,34 +159,14 @@ namespace Assignment3.Controllers
         }
 
         // GET: api/Provider?lastName="value"
-        [HttpGet("lastName")]
-        public async Task<ActionResult<IEnumerable<Provider>>> GetProvidersByLastName(string lastName)
+        [HttpGet()]
+        public async Task<ActionResult<IEnumerable<Provider>>> GetOrganizationsByType(string lastName)
         {
             if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
             {
                 var providers = from p in _context.Provider
-                                where p.LastName == lastName
-                                select p;
-
-                //return new Error(200, "The GET operation completed successfully.");
-                return await providers.ToListAsync();
-            }
-            else
-            {
-                //return new Error(406, "HTTP Accept header is invalid.");
-                return StatusCode(406);
-            }
-        }
-
-        // GET: api/Provider?licenseNumber="value"
-        [HttpGet("licenseNumber")]
-        public async Task<ActionResult<IEnumerable<Provider>>> GetProvidersByLicenseNumber(uint licenseNumber)
-        {
-            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
-            {
-                var providers = from p in _context.Provider
-                                where p.LicenseNumber == licenseNumber
-                                select p;
+                                    where p.LastName == lastName
+                                    select p;
 
                 //return new Error(200, "The GET operation completed successfully.");
                 return await providers.ToListAsync();
