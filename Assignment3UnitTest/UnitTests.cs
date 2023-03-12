@@ -155,5 +155,50 @@ namespace Assignment3UnitTest
             Assert.AreEqual(200, actualResult.StatusCode);
 
         }
+
+        /// <summary>
+        /// Tests the Provider Controller PostImmunization method, 
+        /// retrieving the status code. 
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task Provider_PostRequest()
+        {
+
+            var options = new DbContextOptionsBuilder<Assignment3Context>()
+                .UseSqlServer()
+                .Options;
+            db = new Assignment3Context(options);
+
+            //Create database
+            db.Database.EnsureDeleted();
+            db.Database.EnsureCreated();
+
+            //Provider record
+            Provider provider = new Provider()
+            {
+                Id = Guid.NewGuid(),
+                CreationTime = DateTimeOffset.Now,
+                FirstName = "FirstNameTest",
+                LastName = "LastNameTest",
+                LicenseNumber = 1,
+                Address = "123 Test Street"
+            };
+
+            var providerController = new ProvidersController(db);
+            providerController.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext();
+            providerController.ControllerContext.HttpContext = new DefaultHttpContext();
+            providerController.Request.Headers.Add("Accept", "application/json");
+
+            var serializedToJson = JsonSerializer.Serialize(provider);
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(serializedToJson));
+
+            providerController.Request.Body = stream;
+            providerController.HttpContext.Response.ContentType = "application/json";
+
+            var response = providerController.Response;
+
+            Assert.AreEqual(200, response.StatusCode);
+        }
     }
 }
