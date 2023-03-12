@@ -12,7 +12,7 @@ using System.Text.Json;
 namespace Assignment3UnitTest
 {
     [TestClass]
-    public class UnitTests:ControllerBase
+    public class UnitTests : ControllerBase
     {
         private Assignment3Context db;
 
@@ -55,22 +55,10 @@ namespace Assignment3UnitTest
             immunizationController.Request.Body = stream;
             immunizationController.HttpContext.Response.ContentType = "application/json";
 
-            var test3 = immunizationController.Response;
             //Act
-            ImmunizationsController response = new ImmunizationsController(db);
-            //var test2 = await response.PostImmunization(immunization); // = await immunizationController.PostImmunization(immunization);
-           // var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7267/Immunization");
-            //request.Headers.Add("Accept", "application/json");
-
-            //Microsoft.AspNetCore.Mvc.ActionResult<Error> cres =  (Microsoft.AspNetCore.Mvc.ActionResult<Error>)response;
-
-            //var request = new HttpRequestMessage(HttpMethod.Post, "http://stackoverflow");
-            //request.Headers.Add("Accept", "application/json");
-            //// = request;
-
-            //var test = response.Value.StatusCode;
+            var actualResult = immunizationController.Response;
             //Assert
-            Assert.AreEqual(200, test3.StatusCode);
+            Assert.AreEqual(200, actualResult.StatusCode);
         }
 
         [TestMethod]
@@ -109,7 +97,7 @@ namespace Assignment3UnitTest
 
             // Act
             var actualResult = organizationController.Response;
-            
+
             //Assert
             Assert.AreEqual(200, actualResult.StatusCode);
         }
