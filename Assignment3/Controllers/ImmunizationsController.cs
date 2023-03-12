@@ -10,10 +10,11 @@ using Assignment3.Models;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Xml.Serialization;
+using System.Text;
 
 namespace Assignment3.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/Immunization")]
     [ApiController]
     public class ImmunizationsController : ControllerBase
     {
@@ -24,59 +25,224 @@ namespace Assignment3.Controllers
             _context = context;
         }
 
-        // GET: api/Immunizations
+        // GET: /Immunization
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Immunization>>> GetImmunization()
+        private async Task<ActionResult<IEnumerable<Immunization>>> GetImmunization()
         {
             return await _context.Immunization.ToListAsync();
         }
 
-        // GET: api/Immunizations/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Immunization>> GetImmunization(Guid id)
+        // GET: Immunization/B93955E2-0555-4261-B792-0AA0225FBFC2
+        [HttpGet("{immunizationId}")]
+        public async Task<ActionResult<Immunization>> GetImmunizationByImmunizationIdAsync(Guid immunizationId)
         {
-            var immunization = await _context.Immunization.FindAsync(id);
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+            {
+                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+            }
+            Guid guidOutput;
+            bool isValid = Guid.TryParse(immunizationId.ToString(), out guidOutput);
+            if (!isValid)
+            {
+                return StatusCode(400, new Error(400, "Invalid immunizationId."));
+            }
+            var immunization = await _context.Immunization.FindAsync(immunizationId);
 
             if (immunization == null)
             {
-                return NotFound();
+                return StatusCode(404, new Error(404, "ImmunizationId: " + immunizationId + " was not found."));
             }
 
-            return immunization;
+            return StatusCode(200, immunization);
+
         }
 
-        // PUT: api/Immunizations/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutImmunization(Guid id, Immunization immunization)
+
+        // GET: Immunization?creationTime="2023-03-11T17:50:24.0444629"
+        [HttpGet]
+        public async Task<ActionResult<Immunization>> GetImmunizationByCreatedDateAsync(DateTimeOffset creationTime)
         {
-            if (id != immunization.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(immunization).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                {
+                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                }
+                DateTimeOffset dateTimeOffsetOutput;
+                bool isValid = DateTimeOffset.TryParse(creationTime.ToString(), out dateTimeOffsetOutput);
+                if (!isValid)
+                {
+                    return StatusCode(400, new Error(400, "Invalid date time for creation."));
+                }
+
+                List<Immunization>? immunization = await (from e in _context.Immunization
+                                                          where e.CreationTime == creationTime
+                                                          select e).ToListAsync();
+
+                if (immunization == null)
+                {
+                    return StatusCode(404, new Error(404, "creationTime: " + creationTime + " was not found."));
+                }
+
+                return StatusCode(200, immunization);
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ImmunizationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+            catch (Exception) { 
+                
+                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
             }
 
-            return NoContent();
         }
 
-        // POST: api/Immunizations
+        [HttpGet("officialName")]
+        public async Task<ActionResult<Immunization>> GetImmunizationByOfficialNameAsync(string officialName)
+        {
+            try {
+
+                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                {
+                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                }
+
+                bool isValid = !string.IsNullOrEmpty(officialName);
+                if (!isValid)
+                {
+                    return StatusCode(400, new Error(400, "No record for that Official name."));
+                }
+
+                List<Immunization>? immunization = await (from e in _context.Immunization
+                                                          where e.OfficialName == officialName
+                                                          select e).ToListAsync();
+
+                if (immunization == null)
+                {
+                    return StatusCode(404, new Error(404, "Official Name: " + officialName + " was not found."));
+                }
+
+                return StatusCode(200, immunization);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+            }
+
+        }
+
+        [HttpGet("tradeName")]
+        public async Task<ActionResult<Immunization>> GetImmunizationByTradelNameAsync(string? tradeName)
+        {
+            try {
+
+                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                {
+                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                }
+
+                bool isValid = !string.IsNullOrEmpty(tradeName);
+                if (!isValid)
+                {
+                    return StatusCode(400, new Error(400, "No record for that Trade name."));
+                }
+
+                List<Immunization>? immunization = await (from e in _context.Immunization
+                                                          where e.TradeName == tradeName
+                                                          select e).ToListAsync();
+
+                if (immunization == null)
+                {
+                    return StatusCode(404, new Error(404, "Trade Name: " + tradeName + " was not found."));
+                }
+
+                return StatusCode(200, immunization);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+            }
+        }
+
+        [HttpGet("lotNumber")]
+        public async Task<ActionResult<Immunization>> GetImmunizationByLotNumberAsync(string lotNumber)
+        {
+            try 
+            {
+                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                {
+                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                }
+
+                bool isValid = !string.IsNullOrEmpty(lotNumber);
+                if (!isValid)
+                {
+                    return StatusCode(400, new Error(400, "No record for that Trade name."));
+                }
+
+                List<Immunization>? immunization = await (from e in _context.Immunization
+                                                          where e.LotNumber == lotNumber
+                                                          select e).ToListAsync();
+
+                if (immunization == null)
+                {
+                    return StatusCode(404, new Error(404, "Lot Number: " + lotNumber + " was not found."));
+                }
+
+                return StatusCode(200, immunization);
+            }
+            
+            catch (Exception)
+            {
+                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+            }
+
+        }
+
+
+
+        // PUT: api/Immunizations/3F0D0E7E-370D-4980-AD50-003271D2C117
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{immunizationId}")]
+        public async Task<IActionResult> PutImmunization(Guid immunizationId, Immunization immunization)
+        {
+
+            try 
+            {
+                //if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                //{
+                //    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                //}
+
+                Guid guidOutput;
+                bool isValid = Guid.TryParse(immunizationId.ToString(), out guidOutput);
+                if (!isValid)
+                {
+                    return StatusCode(400, new Error(400, "Invalid immunizationId."));
+                }
+
+
+
+                Immunization? immunizationObj = await _context.Immunization.FirstOrDefaultAsync(a => a.Id == immunizationId);
+
+                if (immunization == null && immunizationObj == null)
+                {
+                    return StatusCode(404, new Error(404, "Id: " + immunizationId + " was not found."));
+                }
+                immunizationObj!.OfficialName = immunization!.OfficialName;
+                immunizationObj.TradeName = immunization.TradeName;
+                immunizationObj.LotNumber = immunization.LotNumber;
+                immunizationObj.ExpirationDate = immunization.ExpirationDate;
+
+                await _context.SaveChangesAsync();
+
+                return StatusCode(202, new Error(202, $"Id: {immunizationId} was modified succesfully"));
+
+
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+            }
+        }
+
+        // POST: api/Immunization
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Error>> PostImmunization(Immunization immunization)
@@ -85,24 +251,16 @@ namespace Assignment3.Controllers
             {
                 DateTimeOffset invaliDateFlag = new DateTimeOffset();
                 DateTimeOffset.TryParse("0001-01-01 12:00:00 AM +00:00", out invaliDateFlag);
-                
-                
-                    // If the date does not comply or is null or content is empty
+
+                // If the date does not comply or is null or content is empty
                 if (immunization.ExpirationDate.Equals(invaliDateFlag) ||
-                    string.IsNullOrEmpty(immunization.ExpirationDate.ToString())) {
-                    //if (Request.Headers.ContentType == "application/json")
-                    //{
-                        return StatusCode(400, new Error(400, "Expiration date is missing"));
-                    //}
-                    //else if (Request.Headers.ContentType == "application/xml")
-                    //{
-                    //    Debug.WriteLine("in");
-                    //    byte[] errorXmlSerialized = SerializeToXml<Error>(new Error(400, "Expiration date is missing"));
-                    //    return StatusCode(400, errorXmlSerialized);
-
-                    //}
-
+                    string.IsNullOrEmpty(immunization.ExpirationDate.ToString()) ||
+                    immunization.OfficialName == null ||
+                    immunization.LotNumber == null)
+                {
+                    return StatusCode(400, new Error(400, "Missing fields: 'ExpirationDate', 'OfficialName', 'LotNumber', 'UpdatedTime' cannot be missing"));
                 }
+
 
                 // if the Content-Type application/json
                 if (Request.Headers.ContentType == "application/json")
@@ -111,7 +269,6 @@ namespace Assignment3.Controllers
                     if (!((JsonSerializer.Deserialize<Immunization>(immunization.ToString())).GetType() == typeof(Immunization)))
                     {
                         return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
-
                     }
                 }
 
@@ -119,53 +276,61 @@ namespace Assignment3.Controllers
                 if (Request.Headers.ContentType == "application/xml")
                 {
                     // if the body of the request is not a valid xml
-                    byte[] xmlimmunization =  SerializeToXml<Immunization>(immunization);
+                    byte[] xmlimmunization = SerializeToXml<Immunization>(immunization);
                     Immunization xmlDeserializedImmunization = DeserializeFromXml<Immunization>(xmlimmunization);
                     if (!(xmlDeserializedImmunization.GetType() == typeof(Immunization)))
                     {
                         return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
-
                     }
                 }
-                //}
-                //if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
-                
-                // if there is no Accept-header
-                if (string.IsNullOrEmpty(Request.Headers.Accept))
+
+                // if there is no Accept-header or is invalid
+                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
                 {
-                    return StatusCode(406, new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed"));// new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed");
+                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
                 }
 
-                if ((Request.Headers.Accept != "application/xml" && Request.Headers.Accept != "application/json")) {
-                    Request.Headers.Accept = "application/json";
-
-                }
                 _context.Immunization.Add(immunization);
                 await _context.SaveChangesAsync();
 
                 return StatusCode(201, new Error(201, "The POST operation completed successfully"));
 
-
-
-
-                //_context.Immunization.Add(immunization);
-                //await _context.SaveChangesAsync();
-
-                //return CreatedAtAction("GetImmunization", new { id = immunization.Id }, immunization);
             }
             catch (Exception ex)
             {
 
-                return null;
+                return StatusCode(500, new Error(500, "Unexpected error occured"));
+
             }
 
         }
 
-        // DELETE: api/Immunizations/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteImmunization(Guid id)
+        // DELETE: api/Immunizations/7CC3C310-4F4A-432B-AC48-0AC354B217D8
+        [HttpDelete("{immunizationId}")]
+        public async Task<ActionResult<Error>> DeleteImmunization(Guid immunizationId)
         {
-            var immunization = await _context.Immunization.FindAsync(id);
+            if (string.IsNullOrEmpty(Request.Headers.Accept))
+            {
+                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+            }
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+            {
+                Request.Headers.Accept = "application/json";
+            }
+
+            Guid guidOutput;
+            bool isValid = Guid.TryParse(immunizationId.ToString(), out guidOutput);
+            if (!isValid)
+            {
+                return StatusCode(400, new Error(400, "Invalid immunizationId."));
+            }
+
+            var immunization = await _context.Immunization.FindAsync(immunizationId);
+
+            if (immunization == null )
+            {
+                return StatusCode(404, new Error(404, "Id: " + immunizationId + " was not found."));
+            }
             if (immunization == null)
             {
                 return NotFound();
@@ -210,5 +375,8 @@ namespace Assignment3.Controllers
 
             return deserializedObject;
         }
+
+        
     }
 }
+
