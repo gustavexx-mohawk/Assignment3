@@ -245,7 +245,7 @@ namespace Assignment3.Controllers
         // POST: api/Provider
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Provider>> PostOrganization(Provider provider)
+        public async Task<ActionResult<Provider>> PostProvider(Provider provider)
         {
             if (string.IsNullOrEmpty(Request.Headers.Accept))
             {
