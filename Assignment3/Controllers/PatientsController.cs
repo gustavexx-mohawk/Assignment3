@@ -34,53 +34,19 @@ namespace Assignment3.Controllers
         {
             if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
             {
-                if (patient.FirstName == null || patient.LastName == null || patient.DateOfBirth == null)
+                try
+                {
+                    _context.Patient.Add(patient);
+                    await _context.SaveChangesAsync();
+                    var result = CreatedAtAction("GetPatient", new { id = patient.Id }, patient);
+                    logErrorMsg(201, "The POST operation completed successfully.");
+                    return StatusCode(201, new Error(201, "The POST operation completed successfully."));
+                }
+                catch(HttpRequestException e)
                 {
                     logErrorMsg(400, "Mandatory field missiong");
                     return StatusCode(400, new Error(400, "Mandatory field missing."));
-                }
-
-                if (Request.Headers.ContentType == "application/xml")
-                {
-                    byte[] xmlPatient = SerializeToXml<Patient>(patient);
-                    Patient xmlDeserializedPatient = DeserializeFromXml<Patient>(xmlPatient);
-
-                    if (!(xmlDeserializedPatient.GetType() == typeof(Patient)))
-                    {
-                        logErrorMsg(415, "Content is not in valid XML format.");
-                        return StatusCode(415, new Error(415, "Content is not in valid XML format."));
-                    }
-                }
-                else if (Request.Headers.Accept == "application/json")
-                {
-                    byte[] jsonPatient = SerializeToJson<Patient>(patient);
-                    Patient jsonDeserializedPatient = DeserializeFromJson<Patient>(jsonPatient);
-
-                    if (!(jsonDeserializedPatient.GetType() == typeof(Patient)))
-                    {
-                        logErrorMsg(415, "Content is not in valid Json format.");
-                        return StatusCode(415, new Error(415, "Content is not in valid Json format."));
-                    }
-                }
-                else
-                {
-                    logErrorMsg(415, "Content is not in XML or JSON format.");
-                    return StatusCode(415, new Error(415, "Content is not in XML or JSON format."));
-                }
-                _context.Patient.Add(patient);
-                await _context.SaveChangesAsync();
-                var result = CreatedAtAction("GetPatient", new { id = patient.Id }, patient);
-
-                if (result.StatusCode == 201)
-                {
-                    logErrorMsg(201, "The POST operation completed successfully.");
-                    return StatusCode(201, new Error(201, "The POST operation completed successfully."));                    
-                }
-                else
-                {
-                    logErrorMsg(500, "An unexpected error occurred.");
-                    return StatusCode(500, new Error(500, "An unexpected error occurred."));
-                }
+                }                
             }
             else
             {
@@ -294,7 +260,7 @@ namespace Assignment3.Controllers
         }
 
         // log Error msg to a database
-        public void logErrorMsg(int code, string msg)
+        private void logErrorMsg(int code, string msg)
         {
             string position = "Patient || ";
             Error error = new Error(code, position + msg);
