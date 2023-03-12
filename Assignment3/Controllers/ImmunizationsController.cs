@@ -83,14 +83,31 @@ namespace Assignment3.Controllers
         {
             try
             {
-                var test = immunization.ToString();
-                //if (string.IsNullOrEmpty(test)) { 
-                //    Debug.WriteLine($"test : {test}");
-                // 
+                DateTimeOffset invaliDateFlag = new DateTimeOffset();
+                DateTimeOffset.TryParse("0001-01-01 12:00:00 AM +00:00", out invaliDateFlag);
+                
+                
+                    // If the date does not comply or is null or content is empty
+                if (immunization.ExpirationDate.Equals(invaliDateFlag) ||
+                    string.IsNullOrEmpty(immunization.ExpirationDate.ToString())) {
+                    //if (Request.Headers.ContentType == "application/json")
+                    //{
+                        return StatusCode(400, new Error(400, "Expiration date is missing"));
+                    //}
+                    //else if (Request.Headers.ContentType == "application/xml")
+                    //{
+                    //    Debug.WriteLine("in");
+                    //    byte[] errorXmlSerialized = SerializeToXml<Error>(new Error(400, "Expiration date is missing"));
+                    //    return StatusCode(400, errorXmlSerialized);
+
+                    //}
+
+                }
+
                 // if the Content-Type application/json
                 if (Request.Headers.ContentType == "application/json")
                 {
-                    // if the body of the request is a valid json
+                    // if the body of the request is not a valid json
                     if (!((JsonSerializer.Deserialize<Immunization>(immunization.ToString())).GetType() == typeof(Immunization)))
                     {
                         return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
@@ -98,12 +115,13 @@ namespace Assignment3.Controllers
                     }
                 }
 
+                // if the Content-Type application/xml
                 if (Request.Headers.ContentType == "application/xml")
                 {
-                    // if the body of the request is a valid json
+                    // if the body of the request is not a valid xml
                     byte[] xmlimmunization =  SerializeToXml<Immunization>(immunization);
                     Immunization xmlDeserializedImmunization = DeserializeFromXml<Immunization>(xmlimmunization);
-                    if (xmlDeserializedImmunization.GetType() == typeof(Immunization))
+                    if (!(xmlDeserializedImmunization.GetType() == typeof(Immunization)))
                     {
                         return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
 
@@ -111,19 +129,21 @@ namespace Assignment3.Controllers
                 }
                 //}
                 //if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+                
+                // if there is no Accept-header
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
                     return StatusCode(406, new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed"));// new Error(406, "Accept-Header Invalid, only 'aplication/json' or application/xml allowed");
                 }
-                if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")) {
+
+                if ((Request.Headers.Accept != "application/xml" && Request.Headers.Accept != "application/json")) {
                     Request.Headers.Accept = "application/json";
 
-                    _context.Immunization.Add(immunization);
-                    await _context.SaveChangesAsync();
-
-                    return StatusCode(201, new Error(201, "he POST operation completed successfully"));
                 }
-                
+                _context.Immunization.Add(immunization);
+                await _context.SaveChangesAsync();
+
+                return StatusCode(201, new Error(201, "The POST operation completed successfully"));
 
 
 
@@ -131,7 +151,7 @@ namespace Assignment3.Controllers
                 //_context.Immunization.Add(immunization);
                 //await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetImmunization", new { id = immunization.Id }, immunization);
+                //return CreatedAtAction("GetImmunization", new { id = immunization.Id }, immunization);
             }
             catch (Exception ex)
             {

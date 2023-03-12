@@ -17,8 +17,6 @@ namespace Assignment3.Models
         public string LotNumber { get; set; }
 
         [Required]
-        [JsonIgnore]
-        [XmlIgnore]
         public DateTimeOffset ExpirationDate { get; set; }
 
         [JsonIgnore]
@@ -29,6 +27,7 @@ namespace Assignment3.Models
         {
             
             UpdatedTime = DateTimeOffset.Now;
+            
         }
 
         public override string ToString() => JsonSerializer.Serialize(this);
