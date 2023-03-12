@@ -24,5 +24,7 @@ namespace Assignment3.Data
         public DbSet<Organization> Organization { get; set; }
 
         public DbSet<Provider> Provider { get; set; }
+
+        public DbSet<Error> Error { get; set; }
     }
 }
