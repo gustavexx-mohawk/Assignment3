@@ -6,7 +6,7 @@ namespace Assignment3.Models
     {
         [Key]
         [Required]
-        public Guid Id { get; }
+        public Guid Id { get; private set; }
 
         [Required]
         public DateTimeOffset CreationTime { get; set; }
