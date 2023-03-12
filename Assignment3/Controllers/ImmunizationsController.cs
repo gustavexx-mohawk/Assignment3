@@ -38,10 +38,14 @@ namespace Assignment3.Controllers
         {
             try
             {
+
                 // if there is no Accept-header
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 // if the Accept-header is invalid
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
@@ -52,22 +56,35 @@ namespace Assignment3.Controllers
                 bool isValid = Guid.TryParse(immunizationId.ToString(), out guidOutput);
                 if (!isValid)
                 {
-                    return StatusCode(400, new Error(400, "Invalid immunizationId."));
+                    Error error400 = new Error(400, "Invalid immunizationId.");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
+                    
                 }
                 var immunization = await _context.Immunization.FindAsync(immunizationId);
 
                 if (immunization == null)
                 {
-                    return StatusCode(404, new Error(404, "ImmunizationId: " + immunizationId + " was not found."));
+                    Error error404 = new Error(404, $"ImmunizationId :  {immunizationId} was not found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404);
                 }
 
+                Error error200 = new Error(200, "The GET operation completed successfully.");
+                _context.Error.Add(error200);
+                await _context.SaveChangesAsync();
                 return StatusCode(200, immunization);
 
             }
 
             catch (Exception)
             {
-                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
         }
 
@@ -81,7 +98,10 @@ namespace Assignment3.Controllers
                 // if there is no Accept-header
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 // if the Accept-header is invalid
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
@@ -96,21 +116,33 @@ namespace Assignment3.Controllers
 
                 if (!isValid || immunization.Count == 0)
                 {
-                    return StatusCode(400, new Error(400, "No record for this date time for creation."));
+                    Error error400 = new Error(400, "No record for this date time for creation.");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
                 }
 
                 
 
                 if (immunization == null)
                 {
-                    return StatusCode(404, new Error(404, "creationTime: " + creationTime + " was not found."));
+                    Error error404 = new Error(404, $"Immunization with Creation Time {creationTime} was not found found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404);
                 }
 
-                return StatusCode(200, immunization);
+                Error error200 = new Error(200, "The GET operation completed successfully.");
+                _context.Error.Add(error200);
+                await _context.SaveChangesAsync();
+                return StatusCode(200,  immunization);
             }
-            catch (Exception) { 
-                
-                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+            catch (Exception) {
+
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
 
         }
@@ -123,7 +155,10 @@ namespace Assignment3.Controllers
                 // if there is no Accept-header
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 // if the Accept-header is invalid
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
@@ -134,23 +169,35 @@ namespace Assignment3.Controllers
                 bool isValid = !string.IsNullOrEmpty(officialName);
                 if (!isValid)
                 {
-                    return StatusCode(400, new Error(400, "No record for that Official name."));
+                    Error error400 = new Error(400, "No record for that Official name.");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
                 }
 
                 List<Immunization>? immunization = await (from e in _context.Immunization
                                                           where e.OfficialName == officialName
                                                           select e).ToListAsync();
 
-                if (immunization == null)
+                if (immunization == null || immunization.Count == 0)
                 {
-                    return StatusCode(404, new Error(404, "Official Name: " + officialName + " was not found."));
+                    Error error404 = new Error(404, $"Immunization with Official Name {officialName} could not be found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404);
                 }
 
+                Error error200 = new Error(200, "The Operation completed successfully.");
+                _context.Error.Add(error200);
+                await _context.SaveChangesAsync();
                 return StatusCode(200, immunization);
             }
             catch (Exception)
             {
-                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
 
         }
@@ -163,7 +210,10 @@ namespace Assignment3.Controllers
                 // if there is no Accept-header
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 // if the Accept-header is invalid
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
@@ -174,23 +224,35 @@ namespace Assignment3.Controllers
                 bool isValid = !string.IsNullOrEmpty(tradeName);
                 if (!isValid)
                 {
-                    return StatusCode(400, new Error(400, "No record for that Trade name."));
+                    Error error400 = new Error(400, "No record for that Trade name.");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
                 }
 
                 List<Immunization>? immunization = await (from e in _context.Immunization
                                                           where e.TradeName == tradeName
                                                           select e).ToListAsync();
 
-                if (immunization == null)
+                if (immunization == null || immunization.Count == 0)
                 {
-                    return StatusCode(404, new Error(404, "Trade Name: " + tradeName + " was not found."));
+                    Error error404 = new Error(404, $"Immunization with Trade Name: {tradeName} was not found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404);
                 }
 
+                Error error200 = new Error(200, "The operation completed successfully.");
+                _context.Error.Add(error200);
+                await _context.SaveChangesAsync();
                 return StatusCode(200, immunization);
             }
             catch (Exception)
             {
-                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
         }
 
@@ -202,7 +264,10 @@ namespace Assignment3.Controllers
                 // if there is no Accept-header
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 // if the Accept-header is invalid
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
@@ -213,24 +278,36 @@ namespace Assignment3.Controllers
                 bool isValid = !string.IsNullOrEmpty(lotNumber);
                 if (!isValid)
                 {
-                    return StatusCode(400, new Error(400, "No record for that Trade name."));
+                    Error error400 = new Error(400, "Mandatory field missing: lotNumber.");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
                 }
 
                 List<Immunization>? immunization = await (from e in _context.Immunization
                                                           where e.LotNumber == lotNumber
                                                           select e).ToListAsync();
 
-                if (immunization == null)
+                if (immunization == null || immunization.Count > 0)
                 {
-                    return StatusCode(404, new Error(404, "Lot Number: " + lotNumber + " was not found."));
+                    Error error404 = new Error(404, $"Immunization Lot Number {lotNumber} was not found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404);
                 }
 
+                Error error200 = new Error(200, "The operation completed successfully.");
+                _context.Error.Add(error200);
+                await _context.SaveChangesAsync();
                 return StatusCode(200, immunization);
             }
             
             catch (Exception)
             {
-                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
 
         }
@@ -244,10 +321,40 @@ namespace Assignment3.Controllers
         {
             try 
             {
+                // if the Content-Type application/json
+                if (Request.Headers.ContentType == "application/json")
+                {
+                    // if the body of the request is not a valid json
+                    if (!((JsonSerializer.Deserialize<Immunization>(immunization.ToString())).GetType() == typeof(Immunization)))
+                    {
+                        Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                        _context.Error.Add(error415);
+                        await _context.SaveChangesAsync();
+                        return StatusCode(415, error415);
+                    }
+                }
+
+                // if the Content-Type application/xml
+                if (Request.Headers.ContentType == "application/xml")
+                {
+                    // if the body of the request is not a valid xml
+                    byte[] xmlimmunization = SerializeToXml<Immunization>(immunization);
+                    Immunization xmlDeserializedImmunization = DeserializeFromXml<Immunization>(xmlimmunization);
+                    if (!(xmlDeserializedImmunization.GetType() == typeof(Immunization)))
+                    {
+                        Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                        _context.Error.Add(error415);
+                        await _context.SaveChangesAsync();
+                        return StatusCode(415, error415);
+                    }
+                }
                 // if there is no Accept-header
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 // if the Accept-header is invalid
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
@@ -259,7 +366,10 @@ namespace Assignment3.Controllers
                 bool isValid = Guid.TryParse(immunizationId.ToString(), out guidOutput);
                 if (!isValid)
                 {
-                    return StatusCode(400, new Error(400, "Invalid immunizationId."));
+                    Error error400 = new Error(400, "Invalid immunizationId or mandatory field missing.");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
                 }
 
 
@@ -268,7 +378,10 @@ namespace Assignment3.Controllers
 
                 if (immunization == null && immunizationObj == null)
                 {
-                    return StatusCode(404, new Error(404, "Id: " + immunizationId + " was not found."));
+                    Error error404 = new Error(404, $"ImmunizationId :  {immunizationId} was not found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404);
                 }
                 immunizationObj!.OfficialName = immunization!.OfficialName;
                 immunizationObj.TradeName = immunization.TradeName;
@@ -277,13 +390,18 @@ namespace Assignment3.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return StatusCode(202, new Error(202, $"Id: {immunizationId} was modified succesfully"));
-
+                Error error202 = new Error(202, "The PUT operation completed successfully.");
+                _context.Error.Add(error202);
+                await _context.SaveChangesAsync();
+                return StatusCode(202, error202);
 
             }
             catch (Exception)
             {
-                return StatusCode(500, new Error(500, "Internal Server Error occurred"));
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
         }
 
@@ -325,7 +443,10 @@ namespace Assignment3.Controllers
                     immunization.OfficialName == null ||
                     immunization.LotNumber == null)
                 {
-                    return StatusCode(400, new Error(400, "Missing fields: 'ExpirationDate', 'OfficialName', 'LotNumber', 'UpdatedTime' cannot be missing"));
+                    Error error400 = new Error(400, "Mandatory field missing.");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
                 }
 
 
@@ -335,7 +456,10 @@ namespace Assignment3.Controllers
                     // if the body of the request is not a valid json
                     if (!((JsonSerializer.Deserialize<Immunization>(immunization.ToString())).GetType() == typeof(Immunization)))
                     {
-                        return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
+                        Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                        _context.Error.Add(error415);
+                        await _context.SaveChangesAsync();
+                        return StatusCode(415, error415);
                     }
                 }
 
@@ -347,14 +471,19 @@ namespace Assignment3.Controllers
                     Immunization xmlDeserializedImmunization = DeserializeFromXml<Immunization>(xmlimmunization);
                     if (!(xmlDeserializedImmunization.GetType() == typeof(Immunization)))
                     {
-                        return StatusCode(415, new Error(415, "Content must be a valid xml or json"));
+                        Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                        _context.Error.Add(error415);
+                        await _context.SaveChangesAsync();
+                        return StatusCode(415, error415);
                     }
                 }
 
                 // if there is no Accept-header
-                if (string.IsNullOrEmpty(Request.Headers.Accept)) { 
-                    
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                if (string.IsNullOrEmpty(Request.Headers.Accept)) {
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 // if the Accept-header is invalid
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
@@ -365,12 +494,29 @@ namespace Assignment3.Controllers
                 _context.Immunization.Add(immunization);
                 await _context.SaveChangesAsync();
 
-                return StatusCode(201, new Error(201, "The POST operation completed successfully"));
+                var result = CreatedAtAction("GetImmunizationByImmunizationIdAsync", new { id = immunization.Id }, immunization);
+
+
+                if (result.StatusCode == 201)
+                {
+                    Error error201 = new Error(201, "The POST operation completed successfully.");
+                    _context.Error.Add(error201);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, error201);
+                }
+
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
 
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new Error(500, "Unexpected error occured"));
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
 
         }
@@ -383,7 +529,10 @@ namespace Assignment3.Controllers
             {
                 if (string.IsNullOrEmpty(Request.Headers.Accept))
                 {
-                    return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                    Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                    _context.Error.Add(error406);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(406, error406);
                 }
                 if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
                 {
@@ -394,25 +543,37 @@ namespace Assignment3.Controllers
                 bool isValid = Guid.TryParse(immunizationId.ToString(), out guidOutput);
                 if (!isValid)
                 {
-                    return StatusCode(400, new Error(400, "Invalid immunizationId."));
+                    Error error400 = new Error(400, "Invalid immunizationId");
+                    _context.Error.Add(error400);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(400, error400);
                 }
 
                 var immunization = await _context.Immunization.FindAsync(immunizationId);
 
                 if (immunization == null)
                 {
-                    return StatusCode(404, new Error(404, "Id: " + immunizationId + " was not found."));
+                    Error error404 = new Error(404, $"Immunization with Id: {immunizationId} was not found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404);
                 }
 
                 _context.Immunization.Remove(immunization);
                 await _context.SaveChangesAsync();
 
-                return StatusCode(202, new Error(202, "The DELETE operation completed successfully"));
+                Error error202 = new Error(202, "The DELETE operation completed successfully.");
+                _context.Error.Add(error202);
+                await _context.SaveChangesAsync();
+                return StatusCode(202, error202);
             }
 
             catch (Exception )
             {
-                return StatusCode(500, new Error(500, "Unexpected error occured"));
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
             }
         }
 
