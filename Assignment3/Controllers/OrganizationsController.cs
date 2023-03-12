@@ -216,6 +216,14 @@ namespace Assignment3.Controllers
                 return StatusCode(400, error400);
             }
 
+            if (organization.Name.Length > 256)
+            {
+                Error error400 = new Error(400, "Name must be 256 characters or less.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
             _context.Entry(organization).State = EntityState.Modified;
 
             try
@@ -283,6 +291,14 @@ namespace Assignment3.Controllers
                 organization.Type.ToLower().Equals("pharmacy")))
             {
                 Error error400 = new Error(400, "Type must be Hospital, Clinic, or Pharmacy.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (organization.Name.Length > 256)
+            {
+                Error error400 = new Error(400, "Name must be 256 characters or less.");
                 _context.Error.Add(error400);
                 await _context.SaveChangesAsync();
                 return StatusCode(400, error400);
