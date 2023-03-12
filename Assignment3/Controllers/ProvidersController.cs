@@ -10,7 +10,7 @@ using Assignment3.Models;
 
 namespace Assignment3.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/Provider")]
     [ApiController]
     public class ProvidersController : ControllerBase
     {
@@ -21,207 +21,344 @@ namespace Assignment3.Controllers
             _context = context;
         }
 
-        // POST: api/Providers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Error>> PostProvider(Provider provider)
-        {
-            if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
-            {
-                if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
-                {
-                    if (provider.Id != null && provider.FirstName != null && provider.LastName != null && provider.LicenseNumber != null
-                && provider.CreationTime != null)
-                    {
-                        if (!ProviderExists(provider.Id))
-                        {
-                            _context.Provider.Add(provider);
-                            await _context.SaveChangesAsync();
-                            var result = CreatedAtAction("GetProvider", new { id = provider.Id }, provider);
-
-                            if (result.StatusCode == 201)
-                            {
-                                return new Error(201, "POST operation completed successfully.");
-                            }
-                        }
-                        return new Error(500, "An unexpected error occurred.");
-                    }
-                    else
-                    {
-                        return new Error(400, "Mandatory Field Missing.");
-                    }
-                }
-                else
-                {
-                    return new Error(415, "Content is not in XML or JSON format.");
-                }
-            }
-            else
-            {
-                return new Error(406, "HTTP Accept header is invalid.");
-            }
-        }
-
-        // GET: api/Providers/5
+        // GET: api/Provider/96857544-ee06-45c0-a704-0a04cac90ec7
         [HttpGet("{id}")]
         public async Task<ActionResult<Provider>> GetProvider(Guid id)
         {
-            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
+            if (string.IsNullOrEmpty(Request.Headers.Accept))
             {
-                var provider = await _context.Provider.FindAsync(id);
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406);
+            }
 
-                if (provider == null)
-                {
-                    //return new Error(404, "Organization id " + id + " was not found.");
-                    return StatusCode(404);
-                }
-                else
-                {
-                    //return new Error(200, "The GET operation completed successfully.");
-                    return provider;
-                }
-            }
-            else
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                //return new Error(406, "HTTP Accept header is invalid.");
-                return StatusCode(406);
+                Request.Headers.Accept = "application/json";
             }
+
+            if (id.Equals(null))
+            {
+                Error error400 = new Error(400, "Mandatory field missing: id.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            var provider = await _context.Provider.FindAsync(id);
+
+            if (provider == null)
+            {
+                Error error404 = new Error(404, "Provider id " + id + " was not found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404);
+            }
+
+            Error error200 = new Error(200, "The GET operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
+            return StatusCode(200, provider);
         }
 
-        // PUT: api/Providers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Error>> PutProvider(Guid id, Provider provider)
-        {
-            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
-            {
-                if (Request.Headers.ContentType == "application/xml" || Request.Headers.ContentType == "application/json")
-                {
-                    if (provider.FirstName != null && provider.LastName != null && provider.Id != null
-                        && provider.Address != null && provider.CreationTime != null)
-                    {
-                        _context.Entry(provider).State = EntityState.Modified;
-
-                        try
-                        {
-                            await _context.SaveChangesAsync();
-                        }
-                        catch (DbUpdateConcurrencyException)
-                        {
-                            if (!ProviderExists(id))
-                            {
-                                return new Error(404, "Provider id " + id + " could not be found.");
-                            }
-                            else
-                            {
-                                // throw;
-                                return new Error(500, "An unexpected error occurred.");
-                            }
-                        }
-                        return new Error(200, "The PUT operation completed successfully.");
-                    }
-                    else
-                    {
-                        return new Error(400, "Mandatory field missing.");
-                    }
-                }
-                else
-                {
-                    return new Error(415, "Content is not in XML or JSON format.");
-                }
-            }
-            else
-            {
-                return new Error(406, "HTTP Accept header is invalid.");
-            }
-        }
-
-        // GET: api/Provider?firstName="value"
-        [HttpGet("firstName")]
+        // GET: api/Provider?name="value"
+        [HttpGet("name")]
         public async Task<ActionResult<IEnumerable<Provider>>> GetProvidersByFirstName(string firstName)
         {
-            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
+            if (string.IsNullOrEmpty(Request.Headers.Accept))
             {
-                var providers = from p in _context.Provider
-                                where p.FirstName == firstName
-                                select p;
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406);
+            }
 
-                //return new Error(200, "The GET operation completed successfully.");
-                return await providers.ToListAsync();
-            }
-            else
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                //return new Error(406, "HTTP Accept header is invalid.");
-                return StatusCode(406);
+                Request.Headers.Accept = "application/json";
             }
+
+            if (firstName == null)
+            {
+                Error error400 = new Error(400, "Mandatory field missing: name.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            var providers = from p in _context.Provider
+                            where p.FirstName == firstName
+                            select p;
+
+            if (!providers.Any())
+            {
+                Error error404 = new Error(404, $"No providers named {firstName} were found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404);
+            }
+
+            Error error200 = new Error(200, "The GET operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
+            return StatusCode(200, await providers.ToListAsync());
         }
 
         // GET: api/Provider?lastName="value"
-        [HttpGet("lastName")]
+        [HttpGet("type")]
         public async Task<ActionResult<IEnumerable<Provider>>> GetProvidersByLastName(string lastName)
         {
-            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
+            if (string.IsNullOrEmpty(Request.Headers.Accept))
             {
-                var providers = from p in _context.Provider
-                                where p.LastName == lastName
-                                select p;
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406);
+            }
 
-                //return new Error(200, "The GET operation completed successfully.");
-                return await providers.ToListAsync();
-            }
-            else
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                //return new Error(406, "HTTP Accept header is invalid.");
-                return StatusCode(406);
+                Request.Headers.Accept = "application/json";
             }
+
+            if (lastName == null)
+            {
+                Error error400 = new Error(400, "Mandatory field missing: lastName.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            var providers = from p in _context.Provider
+                            where p.LastName == lastName
+                            select p;
+
+            if (!providers.Any())
+            {
+                Error error404 = new Error(404, $"No providers named {lastName} were found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404);
+            }
+
+            Error error200 = new Error(200, "The GET operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
+            return StatusCode(200, await providers.ToListAsync());
         }
 
-        // GET: api/Provider?licenseNumber="value"
-        [HttpGet("licenseNumber")]
-        public async Task<ActionResult<IEnumerable<Provider>>> GetProvidersByLicenseNumber(uint licenseNumber)
+        // PUT: api/Provider/96857544-ee06-45c0-a704-0a04cac90ec7
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Provider>> PutProvider(Guid id, Provider provider)
         {
-            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
+            if (string.IsNullOrEmpty(Request.Headers.Accept))
             {
-                var providers = from p in _context.Provider
-                                where p.LicenseNumber == licenseNumber
-                                select p;
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406);
+            }
 
-                //return new Error(200, "The GET operation completed successfully.");
-                return await providers.ToListAsync();
-            }
-            else
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                //return new Error(406, "HTTP Accept header is invalid.");
-                return StatusCode(406);
+                Request.Headers.Accept = "application/json";
             }
+
+            if (Request.Headers.ContentType != "application/xml" && Request.Headers.ContentType != "application/json")
+            {
+                Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                _context.Error.Add(error415);
+                await _context.SaveChangesAsync();
+                return StatusCode(415, error415);
+            }
+
+            if (id.Equals(null))
+            {
+                Error error400 = new Error(400, "Mandatory field missing: id.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (provider.FirstName == null || provider.LastName == null || provider.LicenseNumber == null)
+            {
+                Error error400 = new Error(400, "Mandatory field missing.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (!ProviderExists(id))
+            {
+                Error error404 = new Error(404, $"Provider id {id} could not be found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404);
+            }
+
+            if (provider.Id != id)
+            {
+                Error error400 = new Error(400, "The provider id must match the id provided in the PUT body.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (provider.FirstName.Length > 128)
+            {
+                Error error400 = new Error(400, "Name must be 256 characters or less.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (provider.LastName.Length > 128)
+            {
+                Error error400 = new Error(400, "Name must be 128 characters or less.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            _context.Entry(provider).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                Error error500 = new Error(500, "An unexpected error occurred.");
+                _context.Error.Add(error500);
+                await _context.SaveChangesAsync();
+                return StatusCode(500, error500);
+            }
+
+            Error error200 = new Error(200, "The PUT operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
+            return StatusCode(200, error200);
+        }
+
+        // POST: api/Provider
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Provider>> PostOrganization(Provider provider)
+        {
+            if (string.IsNullOrEmpty(Request.Headers.Accept))
+            {
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406);
+            }
+
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
+            {
+                Request.Headers.Accept = "application/json";
+            }
+
+            if (Request.Headers.ContentType != "application/xml" && Request.Headers.ContentType != "application/json")
+            {
+                Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                _context.Error.Add(error415);
+                await _context.SaveChangesAsync();
+                return StatusCode(415, error415);
+            }
+
+            if (string.IsNullOrEmpty(provider.FirstName) || string.IsNullOrEmpty(provider.LastName) || string.IsNullOrEmpty(provider.LicenseNumber.ToString()))
+            {
+                Error error400 = new Error(400, "Mandatory field missing.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (ProviderExists(provider.Id))
+            {
+                Error error400 = new Error(400, "Id already exists in the database.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (provider.FirstName.Length > 128)
+            {
+                Error error400 = new Error(400, "Name must be 128 characters or less.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            if (provider.LastName.Length > 128)
+            {
+                Error error400 = new Error(400, "Name must be 128 characters or less.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400);
+            }
+
+            _context.Provider.Add(provider);
+            await _context.SaveChangesAsync();
+
+            var result = CreatedAtAction("GetProvider", new { id = provider.Id }, provider);
+
+            if (result.StatusCode == 201)
+            {
+                Error error201 = new Error(201, "The POST operation completed successfully.");
+                _context.Error.Add(error201);
+                await _context.SaveChangesAsync();
+                return StatusCode(201, error201);
+            }
+
+            Error error500 = new Error(500, "An unexpected error occurred.");
+            _context.Error.Add(error500);
+            await _context.SaveChangesAsync();
+            return StatusCode(500, error500);
         }
 
         // DELETE: api/Providers/5
         [HttpDelete("{id}")]
-        public async Task<Error> DeleteProvider(Guid id)
+        public async Task<ActionResult<Provider>> DeleteProvider(Guid id)
         {
-            if (Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json")
+            if (string.IsNullOrEmpty(Request.Headers.Accept))
             {
-                var provider = await _context.Provider.FindAsync(id);
-                if (provider == null)
-                {
-                    return new Error(404, "Provider id " + id + " was not found.");
-                }
-
-                _context.Provider.Remove(provider);
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
                 await _context.SaveChangesAsync();
+                return StatusCode(406, error406);
+            }
 
-                return new Error(204, "DELETE operation completed successfully.");
-            }
-            else
+            if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                return new Error(406, "HTTP Accept header is invalid.");
+                Request.Headers.Accept = "application/json";
             }
+
+            var provider = await _context.Provider.FindAsync(id);
+
+            if (provider == null)
+            {
+                Error error404 = new Error(404, $"Provider id {id} could not be found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404);
+            }
+
+            _context.Provider.Remove(provider);
+            await _context.SaveChangesAsync();
+
+            Error error204 = new Error(204, "DELETE operation completed successfully.");
+            _context.Error.Add(error204);
+            await _context.SaveChangesAsync();
+            return StatusCode(204, error204);
         }
 
         private bool ProviderExists(Guid id)
         {
             return _context.Provider.Any(e => e.Id == id);
         }
+
     }
 }
