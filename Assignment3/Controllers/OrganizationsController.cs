@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Assignment3.Data;
 using Assignment3.Models;
 using System.Xml.Serialization;
-using Newtonsoft.Json;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using System.Xml.Linq;
+using System.Text.Json;
 
 namespace Assignment3.Controllers
 {
@@ -28,44 +28,61 @@ namespace Assignment3.Controllers
         {
             if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406.ToString());
             }
 
-            if (Request.Headers.ContentType == "application/xml")
-            {
-                byte[] xmlOrganization = SerializeToXml<Organization>(organization);
-                Organization xmlDeserializedOrganization = DeserializeFromXml<Organization>(xmlOrganization);
+            //if (Request.Headers.ContentType == "application/xml")
+            //{
+            //    byte[] xmlOrganization = SerializeToXml<Organization>(organization);
+            //    Organization xmlDeserializedOrganization = DeserializeFromXml<Organization>(xmlOrganization);
 
-                if (!(xmlDeserializedOrganization.GetType() == typeof(Organization)))
-                {
-                    return StatusCode(415, new Error(415, "Content is not in valid XML format."));
-                }
-            }
-            else if (Request.Headers.ContentType == "application/json")
-            {
-                byte[] jsonOrganization = SerializeToJson<Organization>(organization);
-                Organization jsonDeserializedOrganization = DeserializeFromJson<Organization>(jsonOrganization);
+            //    if (!(xmlDeserializedOrganization.GetType() == typeof(Organization)))
+            //    {
+            //        Error error415 = new Error(415, "Content is not in valid XML format.");
+            //        _context.Error.Add(error415);
+            //        await _context.SaveChangesAsync();
+            //        return StatusCode(415, error415.Message);
+            //    }
+            //}
+            //else if (Request.Headers.ContentType == "application/json")
+            //{
+            //    if (!(JsonSerializer.Deserialize<Organization>(organization.ToString()).GetType() == typeof(Organization)))
+            //    {
+            //        Error error415 = new Error(415, "Content is not in valid Json format.");
+            //        _context.Error.Add(error415);
+            //        await _context.SaveChangesAsync();
+            //        return StatusCode(415, error415.Message);
+            //    }
+            //}
+            //else
 
-                if (!(jsonDeserializedOrganization.GetType() == typeof(Organization)))
-                {
-                    return StatusCode(415, new Error(415, "Content is not in valid Json format."));
-                }
-            }
-            else
+            if (Request.Headers.ContentType != "application/xml" && Request.Headers.ContentType != "application/json")
             {
-                return StatusCode(415, new Error(415, "Content is not in XML or JSON format."));
+                Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                _context.Error.Add(error415);
+                await _context.SaveChangesAsync();
+                return StatusCode(415, error415.ToString());
             }
 
             if (organization.Name == null || organization.Type == null || organization.Address == null)
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing."));
+                Error error400 = new Error(400, "Mandatory field missing.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             if (!(organization.Type.ToLower().Equals("hospital") ||
                 organization.Type.ToLower().Equals("clinic") ||
                 organization.Type.ToLower().Equals("pharmacy")))
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing: Type must be Hospital, Clinic, or Pharmacy."));
+                Error error400 = new Error(400, "Mandatory field missing: Type must be Hospital, Clinic, or Pharmacy.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             _context.Organization.Add(organization);
@@ -75,10 +92,16 @@ namespace Assignment3.Controllers
 
             if (result.StatusCode == 201)
             {
-                return StatusCode(201, new Error(201, "The POST operation completed successfully."));
+                Error error201 = new Error(201, "The POST operation completed successfully.");
+                _context.Error.Add(error201);
+                await _context.SaveChangesAsync();
+                return StatusCode(201, error201.ToString());
             }
 
-            return StatusCode(500, new Error(500, "An unexpected error occurred."));
+            Error error500 = new Error(500, "An unexpected error occurred.");
+            _context.Error.Add(error500);
+            await _context.SaveChangesAsync();
+            return StatusCode(500, error500.ToString());
         }
 
         // GET: api/Organization/96857544-ee06-45c0-a704-0a04cac90ec7
@@ -87,74 +110,106 @@ namespace Assignment3.Controllers
         {
             if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406.ToString());
             }
 
-            if(id.Equals(null))
+            if (id.Equals(null))
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing: id."));
+                Error error400 = new Error(400, "Mandatory field missing: id.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             var organization = await _context.Organization.FindAsync(id);
 
             if (organization == null)
             {
-                return StatusCode(404, new Error(404, "Organization id " + id + " was not found."));
+                Error error404 = new Error(404, "Organization id " + id + " was not found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404.ToString());
             }
 
+            Error error200 = new Error(200, "The GET operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
             return StatusCode(200, organization);
         }
 
         // PUT: api/Organization/96857544-ee06-45c0-a704-0a04cac90ec7
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<ActionResult<Error>> PutOrganization(Guid id, Organization organization)
+        public async Task<ActionResult<Organization>> PutOrganization(Guid id, Organization organization)
         {
             if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406.ToString());
             }
 
-            if (Request.Headers.ContentType == "application/xml")
-            {
-                byte[] xmlOrganization = SerializeToXml<Organization>(organization);
-                Organization xmlDeserializedOrganization = DeserializeFromXml<Organization>(xmlOrganization);
+            //if (Request.Headers.ContentType == "application/xml")
+            //{
+            //    byte[] xmlOrganization = SerializeToXml<Organization>(organization);
+            //    Organization xmlDeserializedOrganization = DeserializeFromXml<Organization>(xmlOrganization);
 
-                if (!(xmlDeserializedOrganization.GetType() == typeof(Organization)))
-                {
-                    return StatusCode(415, new Error(415, "Content is not in valid XML format."));
-                }
-            }
-            else if (Request.Headers.ContentType == "application/json")
-            {
-                byte[] jsonOrganization = SerializeToJson<Organization>(organization);
-                Organization jsonDeserializedOrganization = DeserializeFromJson<Organization>(jsonOrganization);
+            //    if (!(xmlDeserializedOrganization.GetType() == typeof(Organization)))
+            //    {
+            //        Error error415 = new Error(415, "Content is not in valid XML format.");
+            //        _context.Error.Add(error415);
+            //        await _context.SaveChangesAsync();
+            //        return StatusCode(415, error415.Message);
+            //    }
+            //}
+            //else if (Request.Headers.ContentType == "application/json")
+            //{
+            //    if (!(JsonSerializer.Deserialize<Organization>(organization.ToString()).GetType() == typeof(Immunization)))
+            //    {
+            //        Error error415 = new Error(415, "Content is not in valid Json format.");
+            //        _context.Error.Add(error415);
+            //        await _context.SaveChangesAsync();
+            //        return StatusCode(415, error415.Message);
+            //    }
+            //}
+            //else
 
-                if (!(jsonDeserializedOrganization.GetType() == typeof(Organization)))
-                {
-                    return StatusCode(415, new Error(415, "Content is not in valid Json format."));
-                }
-            }
-            else
+            if (Request.Headers.ContentType != "application/xml" && Request.Headers.ContentType != "application/json")
             {
-                return StatusCode(415, new Error(415, "Content is not in XML or JSON format."));
+                Error error415 = new Error(415, "Content is not in XML or JSON format.");
+                _context.Error.Add(error415);
+                await _context.SaveChangesAsync();
+                return StatusCode(415, error415.ToString());
             }
 
             if (id.Equals(null))
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing: id."));
+                Error error400 = new Error(400, "Mandatory field missing: id.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             if (organization.Name == null || organization.Type == null || organization.Address == null)
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing."));
+                Error error400 = new Error(400, "Mandatory field missing.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             if (!(organization.Type.ToLower().Equals("hospital") ||
                 organization.Type.ToLower().Equals("clinic") ||
                 organization.Type.ToLower().Equals("pharmacy")))
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing: Type must be Hospital, Clinic, or Pharmacy."));
+                Error error400 = new Error(400, "Mandatory field missing: Type must be Hospital, Clinic, or Pharmacy.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             organization.Id = id;
@@ -169,16 +224,23 @@ namespace Assignment3.Controllers
             {
                 if (!OrganizationExists(id))
                 {
-                    return StatusCode(404, new Error(404, $"Organization id {id} could not be found."));
+                    Error error404 = new Error(404, $"Organization id {id} could not be found.");
+                    _context.Error.Add(error404);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(404, error404.ToString());
                 }
                 else
                 {
-                    // throw;
-                    return StatusCode(500, new Error(500, "An unexpected error occurred."));
+                    Error error500 = new Error(500, "An unexpected error occurred.");
+                    _context.Error.Add(error500);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(500, error500.ToString());
                 }
             }
-
-            return StatusCode(200, new Error(200, "The PUT operation completed successfully."));
+            Error error200 = new Error(200, "The PUT operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
+            return StatusCode(200, error200.ToString());
         }
 
         // GET: api/Organization?name="value"
@@ -187,12 +249,18 @@ namespace Assignment3.Controllers
         {
             if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406.ToString());
             }
 
             if (name == null)
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing: name."));
+                Error error400 = new Error(400, "Mandatory field missing: name.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             var organizations = from o in _context.Organization
@@ -201,9 +269,15 @@ namespace Assignment3.Controllers
 
             if (!organizations.Any())
             {
-                return StatusCode(404, new Error(404, $"No organizations named {name} were found."));
+                Error error404 = new Error(404, $"No organizations named {name} were found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404.ToString());
             }
 
+            Error error200 = new Error(200, "The GET operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
             return StatusCode(200, await organizations.ToListAsync());
         }
 
@@ -213,12 +287,18 @@ namespace Assignment3.Controllers
         {
             if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406.ToString());
             }
 
             if (type == null)
             {
-                return StatusCode(400, new Error(400, "Mandatory field missing: type."));
+                Error error400 = new Error(400, "Mandatory field missing: type.");
+                _context.Error.Add(error400);
+                await _context.SaveChangesAsync();
+                return StatusCode(400, error400.ToString());
             }
 
             var organizations = from o in _context.Organization
@@ -227,32 +307,47 @@ namespace Assignment3.Controllers
 
             if (!organizations.Any())
             {
-                return StatusCode(404, new Error(404, $"No organizations of type {type} were found."));
+                Error error404 = new Error(404, $"No organizations of type {type} were found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404.ToString());
             }
 
+            Error error200 = new Error(200, "The GET operation completed successfully.");
+            _context.Error.Add(error200);
+            await _context.SaveChangesAsync();
             return StatusCode(200, await organizations.ToListAsync());
         }
 
         // DELETE: api/Organizations/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Error>> DeleteOrganization(Guid id)
+        public async Task<ActionResult<Organization>> DeleteOrganization(Guid id)
         {
             if (!(Request.Headers.Accept == "application/xml" || Request.Headers.Accept == "application/json"))
             {
-                return StatusCode(406, new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json."));
+                Error error406 = new Error(406, "HTTP Accept header is invalid. It must be application/xml or application/json.");
+                _context.Error.Add(error406);
+                await _context.SaveChangesAsync();
+                return StatusCode(406, error406.ToString());
             }
 
             var organization = await _context.Organization.FindAsync(id);
 
             if (organization == null)
             {
-                return StatusCode(404, new Error(404, $"Organization id {id} could not be found."));
+                Error error404 = new Error(404, $"Organization id {id} could not be found.");
+                _context.Error.Add(error404);
+                await _context.SaveChangesAsync();
+                return StatusCode(404, error404.ToString());
             }
 
             _context.Organization.Remove(organization);
             await _context.SaveChangesAsync();
 
-            return StatusCode(204, new Error(204, "DELETE operation completed successfully."));
+            Error error204 = new Error(204, "DELETE operation completed successfully.");
+            _context.Error.Add(error204);
+            await _context.SaveChangesAsync();
+            return StatusCode(204, error204.ToString());
         }
 
         private bool OrganizationExists(Guid id)
@@ -274,23 +369,6 @@ namespace Assignment3.Controllers
             return serializedContent;
         }
 
-        public static byte[] SerializeToJson<T>(T instance)
-        {
-            if (instance == null)
-            {
-                throw new ArgumentNullException(nameof(instance));
-            }
-
-            var serializer = new JsonSerializer();
-            var stringWriter = new StringWriter();
-
-            serializer.Serialize(stringWriter, instance);
-
-            var serializedContent = Encoding.UTF8.GetBytes(stringWriter.ToString());
-
-            return serializedContent;
-        }
-
         private T DeserializeFromXml<T>(byte[] instance)
         {
             // instance can't be null
@@ -305,24 +383,5 @@ namespace Assignment3.Controllers
 
             return deserializedContent;
         }
-
-        public static T DeserializeFromJson<T>(byte[] instance)
-        {
-            if (instance == null)
-            {
-                throw new ArgumentNullException("Instance can't be null");
-            }
-
-            var serializer = new JsonSerializer();
-
-            var jsonReader = new JsonTextReader(new StringReader(Encoding.UTF8.GetString(instance)));
-            var deserializedContent = serializer.Deserialize(jsonReader, typeof(T));
-
-            if (deserializedContent == null)
-                throw new ArgumentNullException("Object could not be deserialized, check type");
-
-            return (T)deserializedContent;
-        }
     }
 }
-
