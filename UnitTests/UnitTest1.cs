@@ -15,7 +15,7 @@ namespace UnitTests
         private async Task<Assignment3Context> GetAssignment3Context()
         {
             var options = new DbContextOptionsBuilder<Assignment3Context>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseSqlServer()
                 .Options;
 
             var assignment3Context = new Assignment3Context(options);
@@ -42,8 +42,8 @@ namespace UnitTests
         {
             // Arrange
             var dbContext = await GetAssignment3Context();
-            
-            using var organizationsController = new OrganizationsController(dbContext);
+
+            OrganizationsController organizationsController = new OrganizationsController(dbContext);
 
             // Act
             ActionResult<Organization> organization = await organizationsController.GetOrganization(organizationId);
