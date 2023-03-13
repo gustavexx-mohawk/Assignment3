@@ -1,4 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿/*
+  Student names: Jongeun Kim, Gustavo Marcano Valero, Piper Sicard, and Amanda Venier.
+  Student numbers: 000826393, 000812644, 000824338, 000764961
+  Date: March 12, 2023
+
+  Purpose: A controller for Organization that determines what response to send back to a user when an HTTP request is made.
+
+  Statement of Authorship: We, Jongeun Kim (000826393), Gustavo Marcano Valero (000812644), Piper Sicard (000824338), and Amanda Venier (000764961) certify that this material is our original work.
+                           No other person's work has been used without due acknowledgement.
+*/
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Assignment3.Data;
 using Assignment3.Models;
@@ -10,20 +21,34 @@ using System.Text.Json;
 
 namespace Assignment3.Controllers
 {
+    /// <summary>
+    /// This class represents a controller for Organization that determines what response to send back to a user when an HTTP request is made.
+    /// </summary>
     [Route("/Organization")]
     [ApiController]
     public class OrganizationsController : ControllerBase
     {
+        /// <value>
+        /// The DbContext for the health care server application.
+        /// </value>
         private readonly Assignment3Context _context;
 
+        /// <summary>
+        /// A constructor for OrganizationController that sets its Assignment3Context.
+        /// </summary>
+        /// <param name="context">The Assignment3Context of teh health care server application.</param>
         public OrganizationsController(Assignment3Context context)
         {
             _context = context;
         }
 
-        // GET: api/Organization/96857544-ee06-45c0-a704-0a04cac90ec7
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Organization>> GetOrganization(Guid id)
+        /// <summary>
+        /// Retrieves a single Organization record by the Organization id.
+        /// </summary>
+        /// <param name="organizationId">The id of the requested organization.</param>
+        /// <returns>The record in XML or JSON if it is found in the database, otherwise an appropriate HTTP StatusCode with an Error object in XML or JSON.</returns>
+        [HttpGet("{organizationId}")]
+        public async Task<ActionResult<Organization>> GetOrganization(Guid organizationId)
         {
             if (string.IsNullOrEmpty(Request.Headers.Accept))
             {
@@ -38,7 +63,7 @@ namespace Assignment3.Controllers
                 Request.Headers.Accept = "application/json";
             }
 
-            if (id.Equals(null))
+            if (organizationId.Equals(null))
             {
                 Error error400 = new Error(400, "Mandatory field missing: id.");
                 _context.Error.Add(error400);
@@ -46,11 +71,11 @@ namespace Assignment3.Controllers
                 return StatusCode(400, error400);
             }
 
-            var organization = await _context.Organization.FindAsync(id);
+            var organization = await _context.Organization.FindAsync(organizationId);
 
             if (organization == null)
             {
-                Error error404 = new Error(404, "Organization id " + id + " was not found.");
+                Error error404 = new Error(404, $"Organization id {organizationId} was not found.");
                 _context.Error.Add(error404);
                 await _context.SaveChangesAsync();
                 return StatusCode(404, error404);
@@ -62,7 +87,11 @@ namespace Assignment3.Controllers
             return StatusCode(200, organization);
         }
 
-        // GET: api/Organization?name="value"
+        /// <summary>
+        /// Retrieves all Organization records that match the name provided.
+        /// </summary>
+        /// <param name="name">The name of the requested organization.</param>
+        /// <returns>The records in XML or JSON any records in the database match the provided name, otherwise an appropriate HTTP StatusCode with an Error object in XML or JSON.</returns>
         [HttpGet("name")]
         public async Task<ActionResult<IEnumerable<Organization>>> GetOrganizationsByName(string name)
         {
@@ -105,7 +134,11 @@ namespace Assignment3.Controllers
             return StatusCode(200, await organizations.ToListAsync());
         }
 
-        // GET: api/Organization?type="value"
+        /// <summary>
+        /// Retrieves all Organization records that match the type provided.
+        /// </summary>
+        /// <param name="type">The type of the requested organization.</param>
+        /// <returns>The records in XML or JSON any records in the database match the provided type, otherwise an appropriate HTTP StatusCode with an Error object in XML or JSON.</returns>
         [HttpGet("type")]
         public async Task<ActionResult<IEnumerable<Organization>>> GetOrganizationsByType(string type)
         {
@@ -148,8 +181,12 @@ namespace Assignment3.Controllers
             return StatusCode(200, await organizations.ToListAsync());
         }
 
-        // PUT: api/Organization/96857544-ee06-45c0-a704-0a04cac90ec7
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Updates an organization record.
+        /// </summary>
+        /// <param name="id">The id of the requested organization.</param>
+        /// <param name="organization">The incoming Organization.</param>
+        /// <returns>An appropriate HTTP StatusCode with an Error object in XML or JSON.</returns>
         [HttpPut("{id}")]
         public async Task<ActionResult<Organization>> PutOrganization(Guid id, Organization organization)
         {
@@ -244,8 +281,11 @@ namespace Assignment3.Controllers
             return StatusCode(200, error200);
         }
 
-        // POST: api/Organization
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Creates an organization record.
+        /// </summary>
+        /// <param name="organization">The incoming Organization.</param>
+        /// <returns>An appropriate HTTP StatusCode with an Error object in XML or JSON.</returns>
         [HttpPost]
         public async Task<ActionResult<Organization>> PostOrganization(Organization organization)
         {
@@ -323,7 +363,11 @@ namespace Assignment3.Controllers
             return StatusCode(500, error500);
         }
 
-        // DELETE: api/Organizations/5
+        /// <summary>
+        /// Deletes an organization record by the organization id.
+        /// </summary>
+        /// <param name="id">The id of the organization to be deleted.</param>
+        /// <returns>An appropriate HTTP StatusCode with an Error object in XML or JSON.</returns>
         [HttpDelete("{id}")]
         public async Task<ActionResult<Organization>> DeleteOrganization(Guid id)
         {
@@ -359,6 +403,11 @@ namespace Assignment3.Controllers
             return StatusCode(204, error204);
         }
 
+        /// <summary>
+        /// Determines whether an Organization is in the database.
+        /// </summary>
+        /// <param name="id">The id of the organization.</param>
+        /// <returns>True if the organization is in the database, false otherwise.</returns>
         private bool OrganizationExists(Guid id)
         {
             return _context.Organization.Any(e => e.Id == id);
