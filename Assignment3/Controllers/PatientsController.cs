@@ -3,6 +3,8 @@
  * Student numbers: 000826393, 000812644, 000824338, 000764961
  * Date: March 12, 2023
  * 
+ * Purpose: A controller for Patient that determines what response to send back to a user when an HTTP request is made.
+ * 
  * Statement of Authorship: We, Jongeun Kim (000826393), 
  *                              Gustavo Marcano Valero (000812644), 
  *                              Piper Sicard (000824338), and 
@@ -10,30 +12,29 @@
  *                              No other person's work has been used without due acknowledgement.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Assignment3.Data;
 using Assignment3.Models;
 using System.Xml.Linq;
-using System.Diagnostics;
-using Newtonsoft.Json;
-using System.Text;
-using System.Xml.Serialization;
 using System.Data;
 
 namespace Assignment3.Controllers
 {
-    [Route("[controller]")]
+    [Route("/Patient")]
     [ApiController]
     public class PatientsController : ControllerBase
     {
+        /// <value>
+        /// The DbContext for the health care server application.
+        /// </value>
         private readonly Assignment3Context _context;
 
+        /// <summary>
+        /// A constructor for OrganizationController that sets its Assignment3Context.
+        /// </summary>
+        /// <param name="context">The Assignment3Context of teh health care server application.</param>
         public PatientsController(Assignment3Context context)
         {
             _context = context;
@@ -189,7 +190,7 @@ namespace Assignment3.Controllers
         /// <returns>List of patient with the patient's first name</returns>
         // GET: Patients?firstname={value}
         // Retrieves all patients that match the first name provided.        
-        [HttpGet]
+        [HttpGet("firstName")]
         public async Task<ActionResult<IEnumerable<Patient>>> GetPatientByFirstName(string firstName)
         {
             if (string.IsNullOrEmpty(Request.Headers.Accept))
